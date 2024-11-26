@@ -43,6 +43,7 @@ public class CategorieController {
         categorieService.deleteCategorie(id);
         return ResponseEntity.noContent().build();
     }
+
     @PostMapping("/bulk")
     public ResponseEntity<List<CategorieDTO>> createCategories(@RequestBody List<CategorieDTO> categorieDTOs) {
         List<CategorieDTO> createdCategories = categorieService.createCategories(categorieDTOs);

@@ -46,6 +46,7 @@ public class CessionServiceImpl implements CessionService {
                 savedCession.getValeurCession()
         );
     }
+
     @Override
     public void annulerCession(Long immobilisationId) {
         // Récupérer l'immobilisation

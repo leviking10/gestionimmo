@@ -118,6 +118,7 @@ public class TelephoneServiceImpl implements TelephoneService {
         }
         telephoneRepository.deleteById(id);
     }
+
     @Override
     public List<TelephoneDTO> createTelephones(List<ImmobilisationDTO> dtos) {
         // Vérifier que tous les DTO sont des instances d'OrdinateurDTO

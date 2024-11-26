@@ -11,6 +11,7 @@ public interface AmortissementService {
     List<AmortissementDTO> generateAmortissementsForImmobilisation(Long immobilisationId, String methode);
 
     void deleteAmortissement(int id);
+
     void cancelAmortissement(int id);
 
 }

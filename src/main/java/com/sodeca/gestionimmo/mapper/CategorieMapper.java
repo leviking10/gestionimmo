@@ -5,6 +5,7 @@ import com.sodeca.gestionimmo.entity.Categorie;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+
 @Mapper(componentModel = "spring")
 public interface CategorieMapper {
     // Conversion spécifique : Categorie -> CategorieDTO
@@ -12,8 +13,10 @@ public interface CategorieMapper {
 
     // Conversion spécifique : CategorieDTO -> Categorie
     Categorie toCategorie(CategorieDTO dto);
+
     @Mapping(target = "id", ignore = true)
     void updateCategorieFromDto(CategorieDTO dto, @MappingTarget Categorie entity);
+
     default Categorie fromId(Long id) {
         if (id == null) {
             return null;

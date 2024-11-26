@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: gestionimmo   # Nom du microservice, utilisé par le config-service pour récupérer les configurations spécifiques
+
+  config:
+    import: configserver:http://localhost:9999  # URL obligatoire du Config-Service

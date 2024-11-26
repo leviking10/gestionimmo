@@ -1,6 +1,5 @@
 package com.sodeca.gestionimmo.controller;
 
-import com.sodeca.gestionimmo.dto.OrdinateurDTO;
 import com.sodeca.gestionimmo.dto.TelephoneDTO;
 import com.sodeca.gestionimmo.services.TelephoneService;
 import org.springframework.http.HttpStatus;
@@ -13,9 +12,11 @@ import java.util.List;
 @RequestMapping("/api/telephones")
 public class TelephoneController {
     private final TelephoneService telephoneService;
+
     public TelephoneController(TelephoneService telephoneService) {
         this.telephoneService = telephoneService;
     }
+
     @GetMapping
     public List<TelephoneDTO> getAllTelephones() {
         return telephoneService.getAllTelephones();
@@ -53,6 +54,7 @@ public class TelephoneController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @PostMapping("/telephones/bulk")
     public ResponseEntity<List<TelephoneDTO>> createTelephones(@RequestBody List<TelephoneDTO> dtos) {
         List<TelephoneDTO> createTelephones = dtos.stream()

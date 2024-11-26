@@ -63,6 +63,7 @@ public class AmortissementController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
     @PutMapping("/cancel/{id}")
     public ResponseEntity<Void> cancelAmortissement(@PathVariable int id) {
         amortissementService.cancelAmortissement(id);

@@ -1,8 +1,11 @@
 package com.sodeca.gestionimmo.entity;
 
-import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
-import lombok.*;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 

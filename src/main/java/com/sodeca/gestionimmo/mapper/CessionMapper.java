@@ -13,6 +13,7 @@ public interface CessionMapper {
     CessionDTO toDTO(Cession cession);
 
     // Mapping d'un DTO Cession vers une entité
-    @Mapping(target = "immobilisation", ignore = true) // L'immobilisation sera associée au niveau du service
+    @Mapping(target = "immobilisation", ignore = true)
+    // L'immobilisation sera associée au niveau du service
     Cession toEntity(CessionDTO dto);
 }

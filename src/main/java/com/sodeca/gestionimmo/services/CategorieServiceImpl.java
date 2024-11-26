@@ -48,6 +48,7 @@ public class CategorieServiceImpl implements CategorieService {
                 .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec l'ID : " + id));
         return mapper.toCategorieDTO(categorie);
     }
+
     @Override
     public List<CategorieDTO> createCategories(List<CategorieDTO> categorieDTOs) {
         // Convertir chaque DTO en entité

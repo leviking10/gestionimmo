@@ -20,6 +20,7 @@ public interface CategorieService {
 
     // Supprimer une catégorie
     void deleteCategorie(Long id);
+
     // Ajouter plusieurs catégories
     List<CategorieDTO> createCategories(List<CategorieDTO> categorieDTOs);
 }

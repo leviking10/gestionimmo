@@ -46,7 +46,8 @@ public interface OrdinateurService {
      * @param id ID de l'ordinateur à supprimer.
      */
     void deleteOrdinateur(Long id);
-/**
+
+    /**
      * Créer une liste d'ordinateurs.
      *
      * @param dtos Liste des OrdinateurDTO à créer.

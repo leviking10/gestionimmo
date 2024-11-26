@@ -1,4 +1,5 @@
 package com.sodeca.gestionimmo.entity;
+
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ public class Amortissement {
     @Column(nullable = false)
     private int dureeRestante; // Durée restante en années ou mois
     @Column
-    private  double valeurNette; // Valeur nette de l'immobilisation
+    private double valeurNette; // Valeur nette de l'immobilisation
     @Enumerated(EnumType.STRING) // Spécifier le type d'énumération
     private StatutAmmortissement statut; // Statut de l'amortissement (ex. En cours, ammorti, annulé)
 }

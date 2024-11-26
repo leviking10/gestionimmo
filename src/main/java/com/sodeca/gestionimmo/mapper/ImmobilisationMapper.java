@@ -1,7 +1,13 @@
 package com.sodeca.gestionimmo.mapper;
 
-import com.sodeca.gestionimmo.dto.*;
-import com.sodeca.gestionimmo.entity.*;
+import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
+import com.sodeca.gestionimmo.dto.OrdinateurDTO;
+import com.sodeca.gestionimmo.dto.TelephoneDTO;
+import com.sodeca.gestionimmo.dto.VehiculeDTO;
+import com.sodeca.gestionimmo.entity.Immobilisation;
+import com.sodeca.gestionimmo.entity.Ordinateur;
+import com.sodeca.gestionimmo.entity.Telephone;
+import com.sodeca.gestionimmo.entity.Vehicule;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

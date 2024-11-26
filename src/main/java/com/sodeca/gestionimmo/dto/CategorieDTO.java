@@ -1,8 +1,9 @@
 package com.sodeca.gestionimmo.dto;
 
-import com.sodeca.gestionimmo.entity.Categorie;
 import lombok.AllArgsConstructor;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @Getter

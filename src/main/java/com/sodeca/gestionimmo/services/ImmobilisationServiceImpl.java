@@ -5,8 +5,9 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.sodeca.gestionimmo.dto.*;
-import com.sodeca.gestionimmo.entity.*;
+import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
+import com.sodeca.gestionimmo.entity.Categorie;
+import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.StatutCession;
 import com.sodeca.gestionimmo.mapper.ImmobilisationMapper;
 import com.sodeca.gestionimmo.repository.CategorieRepository;
@@ -32,6 +33,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         this.immobilisationRepository = immobilisationRepository;
         this.categorieRepository = categorieRepository;
     }
+
     @Override
     public List<ImmobilisationDTO> createImmobilisations(List<ImmobilisationDTO> dtos) {
         List<Immobilisation> immobilisations = dtos.stream().map(dto -> {
@@ -43,7 +45,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             if (!categorie.isActif()) {
                 throw new RuntimeException("La catégorie sélectionnée est désactivée.");
             }
-                        // Convertir le DTO en entité
+            // Convertir le DTO en entité
             Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
             immobilisation.setCategorie(categorie);
 
@@ -69,6 +71,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
                 .map(mapper::toPolymorphicDTO) // Utiliser la conversion polymorphique
                 .toList();
     }
+
     @Override
     public Optional<ImmobilisationDTO> getImmobilisationById(Long id) {
         return immobilisationRepository.findById(id)
@@ -132,6 +135,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
                 .map(mapper::toPolymorphicDTO)
                 .toList();
     }
+
     @Override
     public ImmobilisationDTO getImmobilisationByQRCode(String qrCodeData) {
         // Décoder les données du QR Code pour extraire l'identifiant

@@ -1,6 +1,6 @@
 package com.sodeca.gestionimmo.controller;
 
-import com.sodeca.gestionimmo.dto.*;
+import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.services.ImmobilisationService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,6 +41,7 @@ public class ImmobilisationController {
         ImmobilisationDTO createdImmobilisation = immobilisationService.createImmobilisation(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdImmobilisation);
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<ImmobilisationDTO> updateImmobilisation(@PathVariable Long id, @RequestBody ImmobilisationDTO dto) {
         try {
@@ -50,6 +51,7 @@ public class ImmobilisationController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @PostMapping("/bulk")//pour créer plusieurs immobilisations
     public ResponseEntity<List<ImmobilisationDTO>> createImmobilisations(@RequestBody List<ImmobilisationDTO> dtos) {
         List<ImmobilisationDTO> createdImmobilisations = immobilisationService.createImmobilisations(dtos);
@@ -74,6 +76,7 @@ public class ImmobilisationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
     @GetMapping("/immobilisations/downloadqrcode/{id}")
     public ResponseEntity<byte[]> downloadQRCode(@PathVariable Long id) {
         byte[] qrCodeBytes = immobilisationService.downloadQRCode(id);
@@ -83,6 +86,7 @@ public class ImmobilisationController {
                 .contentType(MediaType.IMAGE_PNG)
                 .body(qrCodeBytes);
     }
+
     @PostMapping("/immobilisations/qrcode")
     public ResponseEntity<ImmobilisationDTO> getImmobilisationByQRCode(@RequestBody String qrCodeData) {
         ImmobilisationDTO immobilisationDTO = immobilisationService.getImmobilisationByQRCode(qrCodeData);

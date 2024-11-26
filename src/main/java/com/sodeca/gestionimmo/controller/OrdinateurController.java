@@ -85,6 +85,7 @@ public class OrdinateurController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @PostMapping("/ordinateurs/bulk")
     public ResponseEntity<List<OrdinateurDTO>> createOrdinateurs(@RequestBody List<OrdinateurDTO> dtos) {
         List<OrdinateurDTO> createdOrdinateurs = dtos.stream()

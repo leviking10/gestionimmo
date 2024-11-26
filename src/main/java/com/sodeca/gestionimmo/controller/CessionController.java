@@ -1,7 +1,6 @@
 package com.sodeca.gestionimmo.controller;
 
 import com.sodeca.gestionimmo.dto.CessionDTO;
-import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.services.CessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +66,7 @@ public class CessionController {
         List<CessionDTO> cessions = cessionService.getCessionsByImmobilisation(immobilisationId);
         return ResponseEntity.ok(cessions);
     }
+
     /**
      * Annuler une cession.
      *
@@ -78,7 +78,6 @@ public class CessionController {
         cessionService.annulerCession(immobilisationId);
         return ResponseEntity.ok().build();
     }
-
 
 
 }

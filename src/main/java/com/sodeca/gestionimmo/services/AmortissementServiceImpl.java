@@ -1,7 +1,6 @@
 package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
-import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.entity.Amortissement;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
@@ -49,12 +48,12 @@ public class AmortissementServiceImpl implements AmortissementService {
     }
 
 
-
     // Méthode utilitaire pour arrondir à un nombre donné de décimales
     private double round(double value, int places) {
         double scale = Math.pow(10, places);
         return Math.round(value * scale) / scale;
     }
+
     @Override
     public List<AmortissementDTO> generateAmortissementsForImmobilisation(Long immobilisationId, String methode) {
         Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
