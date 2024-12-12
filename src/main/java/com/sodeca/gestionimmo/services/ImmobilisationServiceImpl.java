@@ -8,6 +8,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.entity.Categorie;
 import com.sodeca.gestionimmo.entity.Immobilisation;
+import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 import com.sodeca.gestionimmo.enums.StatutCession;
 import com.sodeca.gestionimmo.mapper.ImmobilisationMapper;
 import com.sodeca.gestionimmo.repository.CategorieRepository;
@@ -109,7 +110,14 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         Immobilisation updated = immobilisationRepository.save(immobilisation);
         return mapper.toPolymorphicDTO(updated);
     }
+    @Override
+    public void updateEtat(Long immobilisationId, EtatImmobilisation nouvelEtat) {
+        Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
+                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + immobilisationId));
 
+        immobilisation.setEtatImmo(nouvelEtat);
+        immobilisationRepository.save(immobilisation);
+    }
     @Override
     public byte[] getQRCodeAsImage(Long id) {
         Immobilisation immobilisation = immobilisationRepository.findById(id)

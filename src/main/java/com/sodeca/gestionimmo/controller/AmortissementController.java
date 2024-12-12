@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/amortissements")
 public class AmortissementController {
+
     private final AmortissementService amortissementService;
 
     public AmortissementController(AmortissementService amortissementService) {
@@ -25,8 +26,12 @@ public class AmortissementController {
      */
     @GetMapping("/immobilisation/{immobilisationId}")
     public ResponseEntity<List<AmortissementDTO>> getAmortissementsByImmobilisation(@PathVariable Long immobilisationId) {
-        List<AmortissementDTO> amortissements = amortissementService.getAmortissementsByImmobilisation(immobilisationId);
-        return ResponseEntity.ok(amortissements);
+        try {
+            List<AmortissementDTO> amortissements = amortissementService.getAmortissementsByImmobilisation(immobilisationId);
+            return ResponseEntity.ok(amortissements);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     /**
@@ -37,14 +42,14 @@ public class AmortissementController {
      * @return Liste des AmortissementDTO générés.
      */
     @PostMapping("/generate/{immobilisationId}")
-    public ResponseEntity<List<AmortissementDTO>> generateAmortissements(
+    public ResponseEntity<?> generateAmortissements(
             @PathVariable Long immobilisationId,
             @RequestParam String methode) {
         try {
             List<AmortissementDTO> amortissements = amortissementService.generateAmortissementsForImmobilisation(immobilisationId, methode);
             return ResponseEntity.ok(amortissements);
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
@@ -64,9 +69,19 @@ public class AmortissementController {
         }
     }
 
+    /**
+     * Annuler un amortissement.
+     *
+     * @param id L'ID de l'amortissement à annuler.
+     * @return Une réponse avec le statut 200 (OK) si réussi.
+     */
     @PutMapping("/cancel/{id}")
-    public ResponseEntity<Void> cancelAmortissement(@PathVariable int id) {
-        amortissementService.cancelAmortissement(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> cancelAmortissement(@PathVariable int id) {
+        try {
+            amortissementService.cancelAmortissement(id);
+            return ResponseEntity.ok("Amortissement annulé avec succès.");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
     }
 }

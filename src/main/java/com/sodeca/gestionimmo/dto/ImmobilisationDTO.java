@@ -1,5 +1,7 @@
 package com.sodeca.gestionimmo.dto;
 
+import com.sodeca.gestionimmo.enums.EtatImmobilisation;
+import com.sodeca.gestionimmo.enums.StatutAffectation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -27,5 +29,6 @@ public class ImmobilisationDTO {
     private String qrCode;
     private LocalDate dateMiseEnService;
     private int dureeAmortissement;
-    private String statut;// En service, en réparation, en rebut, etc.
+    private StatutAffectation statutAffectation=StatutAffectation.DISPONIBLE;
+    private EtatImmobilisation etatImmobilisation=EtatImmobilisation.FONCTIONNEL;
 }

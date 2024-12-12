@@ -1,6 +1,7 @@
 package com.sodeca.gestionimmo.controller;
 
 import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
+import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 import com.sodeca.gestionimmo.services.ImmobilisationService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -86,11 +87,16 @@ public class ImmobilisationController {
                 .contentType(MediaType.IMAGE_PNG)
                 .body(qrCodeBytes);
     }
-
     @PostMapping("/immobilisations/qrcode")
     public ResponseEntity<ImmobilisationDTO> getImmobilisationByQRCode(@RequestBody String qrCodeData) {
         ImmobilisationDTO immobilisationDTO = immobilisationService.getImmobilisationByQRCode(qrCodeData);
         return ResponseEntity.ok(immobilisationDTO);
     }
-
+    @PutMapping("/etat/{id}")
+    public ResponseEntity<Void> updateEtat(
+            @PathVariable Long id,
+            @RequestParam EtatImmobilisation etat) {
+        immobilisationService.updateEtat(id, etat);
+        return ResponseEntity.ok().build();
+    }
 }

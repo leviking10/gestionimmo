@@ -1,6 +1,7 @@
 package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
+import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,5 +27,5 @@ public interface ImmobilisationService {
     byte[] downloadQRCode(Long id);
 
     ImmobilisationDTO getImmobilisationByQRCode(String qrCodeData);
-
+    void updateEtat(Long immobilisationId, EtatImmobilisation nouvelEtat);
 }

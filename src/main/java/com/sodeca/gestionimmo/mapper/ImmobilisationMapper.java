@@ -1,15 +1,10 @@
 package com.sodeca.gestionimmo.mapper;
 
-import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
-import com.sodeca.gestionimmo.dto.OrdinateurDTO;
-import com.sodeca.gestionimmo.dto.TelephoneDTO;
-import com.sodeca.gestionimmo.dto.VehiculeDTO;
-import com.sodeca.gestionimmo.entity.Immobilisation;
-import com.sodeca.gestionimmo.entity.Ordinateur;
-import com.sodeca.gestionimmo.entity.Telephone;
-import com.sodeca.gestionimmo.entity.Vehicule;
+import com.sodeca.gestionimmo.dto.*;
+import com.sodeca.gestionimmo.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring", uses = {CategorieMapper.class})
 public interface ImmobilisationMapper {
@@ -50,6 +45,24 @@ public interface ImmobilisationMapper {
     @Mapping(source = "categorieId", target = "categorie")
     Vehicule toVehicule(VehiculeDTO dto);
 
+    // Conversion spécifique : Machine -> MachineDTO avec durée d'amortissement dynamique
+    @Mapping(source = "categorie.id", target = "categorieId")
+    @Mapping(expression = "java(machine.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    MachineDTO toMachineDTO(Machine machine);
+
+    // Conversion spécifique : MachineDTO -> Machine
+    @Mapping(source = "categorieId", target = "categorie")
+    Machine toMachine(MachineDTO dto);
+
+    // Conversion spécifique : Mobilier -> MobilierDTO avec durée d'amortissement dynamique
+    @Mapping(source = "categorie.id", target = "categorieId")
+    @Mapping(expression = "java(mobilier.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    MobilierDTO toMobilierDTO(Mobilier mobilier);
+
+    // Conversion spécifique : MobilierDTO -> Mobilier
+    @Mapping(source = "categorieId", target = "categorie")
+    Mobilier toMobilier(MobilierDTO dto);
+
     // Conversion polymorphique : Entité -> DTO
     default ImmobilisationDTO toPolymorphicDTO(Immobilisation immobilisation) {
         if (immobilisation instanceof Telephone) {
@@ -58,9 +71,23 @@ public interface ImmobilisationMapper {
             return toOrdinateurDTO((Ordinateur) immobilisation);
         } else if (immobilisation instanceof Vehicule) {
             return toVehiculeDTO((Vehicule) immobilisation);
+        } else if (immobilisation instanceof Machine) {
+            return toMachineDTO((Machine) immobilisation);
+        } else if (immobilisation instanceof Mobilier) {
+            return toMobilierDTO((Mobilier) immobilisation);
         } else {
             return toDTO(immobilisation);
         }
+    }
+    // Méthode pour mapper un Long vers une Immobilisation
+    @Named("fromId")
+    default Immobilisation fromId(Long id) {
+        if (id == null) {
+            return null;
+        }
+        Immobilisation immobilisation = new Immobilisation();
+        immobilisation.setId(id);
+        return immobilisation;
     }
 
     // Conversion polymorphique : DTO -> Entité
@@ -71,6 +98,10 @@ public interface ImmobilisationMapper {
             return toOrdinateur((OrdinateurDTO) dto);
         } else if (dto instanceof VehiculeDTO) {
             return toVehicule((VehiculeDTO) dto);
+        } else if (dto instanceof MachineDTO) {
+            return toMachine((MachineDTO) dto);
+        } else if (dto instanceof MobilierDTO) {
+            return toMobilier((MobilierDTO) dto);
         } else {
             return toEntity(dto);
         }

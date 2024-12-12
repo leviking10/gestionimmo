@@ -1,7 +1,10 @@
 package com.sodeca.gestionimmo.entity;
 
+import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 import com.sodeca.gestionimmo.enums.StatutCession;
+import com.sodeca.gestionimmo.enums.StatutAffectation;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -56,8 +59,14 @@ public class Immobilisation {
     private LocalDate dateCession; // Date de cession ou de rebut
 
     @Column
+    @Positive
     private Double valeurCession; // Valeur à la cession ou valeur résiduelle en cas de rebut
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatutAffectation statut = StatutAffectation.DISPONIBLE; // Par défaut DISPONIBLE
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EtatImmobilisation etatImmo = EtatImmobilisation.FONCTIONNEL; // Statut par défaut
     @CreationTimestamp
     private LocalDateTime createdDate;
 

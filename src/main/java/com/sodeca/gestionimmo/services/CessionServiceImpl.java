@@ -30,6 +30,11 @@ public class CessionServiceImpl implements CessionService {
             throw new RuntimeException("La valeur de cession est obligatoire pour une immobilisation vendue.");
         }
 
+        immobilisation.setStatutCession(cessionDTO.getStatutCession());
+        immobilisation.setDateCession(cessionDTO.getDateCession());
+        immobilisation.setValeurCession(cessionDTO.getValeurCession());
+        immobilisationRepository.save(immobilisation);
+
         Cession cession = new Cession();
         cession.setImmobilisation(immobilisation);
         cession.setStatutCession(cessionDTO.getStatutCession());
@@ -38,33 +43,8 @@ public class CessionServiceImpl implements CessionService {
 
         Cession savedCession = cessionRepository.save(cession);
 
-        return new CessionDTO(
-                savedCession.getId(),
-                savedCession.getImmobilisation().getId(),
-                savedCession.getStatutCession(),
-                savedCession.getDateCession(),
-                savedCession.getValeurCession()
-        );
+        return mapToDTO(savedCession);
     }
-
-    @Override
-    public void annulerCession(Long immobilisationId) {
-        // Récupérer l'immobilisation
-        Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
-
-        // Vérifier si l'immobilisation a une cession enregistrée
-        if (immobilisation.getStatutCession() == StatutCession.DISPONIBLE) {
-            throw new RuntimeException("Cette immobilisation n'a pas de cession enregistrée.");
-        }
-
-        // Réinitialiser les champs liés à la cession
-        immobilisation.setStatutCession(StatutCession.DISPONIBLE); // La rendre à nouveau disponible
-        immobilisation.setDateCession(null); // Effacer la date de cession
-        immobilisation.setValeurCession(null); // Effacer la valeur de cession
-        immobilisationRepository.save(immobilisation); // Sauvegarder les modifications
-    }
-
 
     @Override
     public CessionDTO updateCession(Long cessionId, CessionDTO cessionDTO) {
@@ -79,19 +59,28 @@ public class CessionServiceImpl implements CessionService {
         cession.setDateCession(cessionDTO.getDateCession());
         cession.setValeurCession(cessionDTO.getValeurCession());
 
+        Immobilisation immobilisation = cession.getImmobilisation();
+        immobilisation.setStatutCession(cessionDTO.getStatutCession());
+        immobilisation.setDateCession(cessionDTO.getDateCession());
+        immobilisation.setValeurCession(cessionDTO.getValeurCession());
+        immobilisationRepository.save(immobilisation);
+
         Cession updatedCession = cessionRepository.save(cession);
 
-        return new CessionDTO(
-                updatedCession.getId(),
-                updatedCession.getImmobilisation().getId(),
-                updatedCession.getStatutCession(),
-                updatedCession.getDateCession(),
-                updatedCession.getValeurCession()
-        );
+        return mapToDTO(updatedCession);
     }
 
     @Override
     public void deleteCession(Long cessionId) {
+        Cession cession = cessionRepository.findById(cessionId)
+                .orElseThrow(() -> new RuntimeException("Cession introuvable"));
+
+        Immobilisation immobilisation = cession.getImmobilisation();
+        immobilisation.setStatutCession(StatutCession.DISPONIBLE);
+        immobilisation.setDateCession(null);
+        immobilisation.setValeurCession(null);
+        immobilisationRepository.save(immobilisation);
+
         cessionRepository.deleteById(cessionId);
     }
 
@@ -99,13 +88,32 @@ public class CessionServiceImpl implements CessionService {
     public List<CessionDTO> getCessionsByImmobilisation(Long immobilisationId) {
         return cessionRepository.findByImmobilisationId(immobilisationId)
                 .stream()
-                .map(cession -> new CessionDTO(
-                        cession.getId(),
-                        cession.getImmobilisation().getId(),
-                        cession.getStatutCession(),
-                        cession.getDateCession(),
-                        cession.getValeurCession()
-                ))
+                .map(this::mapToDTO)
                 .toList();
+    }
+
+    @Override
+    public void annulerCession(Long immobilisationId) {
+        Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
+                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
+
+        if (immobilisation.getStatutCession() == StatutCession.DISPONIBLE) {
+            throw new RuntimeException("Cette immobilisation n'a pas de cession enregistrée.");
+        }
+
+        immobilisation.setStatutCession(StatutCession.DISPONIBLE);
+        immobilisation.setDateCession(null);
+        immobilisation.setValeurCession(null);
+        immobilisationRepository.save(immobilisation);
+    }
+
+    private CessionDTO mapToDTO(Cession cession) {
+        return new CessionDTO(
+                cession.getId(),
+                cession.getImmobilisation().getId(),
+                cession.getStatutCession(),
+                cession.getDateCession(),
+                cession.getValeurCession()
+        );
     }
 }
