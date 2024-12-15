@@ -13,8 +13,5 @@ public class TelephoneDTO extends ImmobilisationDTO {
     private String modele;
     private String imei;
     private String numeroSerie;
-    private String etat;
-    private String utilisateur;
-    private LocalDate dateAffectation;
 
 }

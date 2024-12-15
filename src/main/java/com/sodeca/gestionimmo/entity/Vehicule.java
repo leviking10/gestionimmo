@@ -1,6 +1,5 @@
 package com.sodeca.gestionimmo.entity;
 
-import com.sodeca.gestionimmo.enums.EtatVehicule;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,10 +28,4 @@ public class Vehicule extends Immobilisation {
     private String kilometrage;
     @Column
     private LocalDate dateDerniereRevision;
-    @Enumerated(EnumType.STRING)
-    private EtatVehicule etat;
-    @Column
-    private String utilisateur;
-    @Column
-    private LocalDate dateAffectation;
 }

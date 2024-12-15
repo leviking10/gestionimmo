@@ -1,5 +1,6 @@
 package com.sodeca.gestionimmo.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,8 +21,6 @@ public class Telephone extends Immobilisation {
     private String marque;
     private String modele;
     private String imei;
+    @Column(unique = true, nullable = false)
     private String numeroSerie;
-    private String etat;
-    private String utilisateur;
-    private LocalDate dateAffectation;
 }

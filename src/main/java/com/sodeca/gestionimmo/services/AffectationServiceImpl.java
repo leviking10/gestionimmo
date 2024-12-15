@@ -102,7 +102,7 @@ public class AffectationServiceImpl implements AffectationService {
         Affectation affectation = mapper.toEntity(dto);
         affectation.setImmobilisation(immobilisation);
         affectation.setPersonnel(personnel);
-
+        affectation.setDateAffectation(dto.getDateAffectation());
         // Marquer l'immobilisation comme affectée
         immobilisation.setStatut(StatutAffectation.AFFECTEE);
         immobilisationRepository.save(immobilisation);

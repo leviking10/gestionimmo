@@ -39,12 +39,12 @@ public class SignalementServiceImpl implements SignalementService {
                 .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
 
         // Vérifier si l'immobilisation est déjà signalée en panne
-        if (immobilisation.getEtatImmo() == EtatImmobilisation.EN_PANNE) {
+        if (immobilisation.getEtatImmo() == EtatImmobilisation.SIGNALE) {
             throw new RuntimeException("L'immobilisation est déjà signalée en panne.");
         }
 
         // Mettre à jour l'état de l'immobilisation à EN_PANNE
-        immobilisation.setEtatImmo(EtatImmobilisation.EN_PANNE);
+        immobilisation.setEtatImmo(EtatImmobilisation.SIGNALE);
         immobilisationRepository.save(immobilisation);
 
         Signalement signalement = signalementMapper.toEntity(signalementDTO);

@@ -45,4 +45,6 @@ public interface VehiculeService {
      * @param id ID du véhicule à supprimer.
      */
     void deleteVehicule(Long id);
+
+    List<VehiculeDTO> createVehicules(List<VehiculeDTO> dtos);
 }

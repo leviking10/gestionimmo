@@ -134,13 +134,16 @@ public class PersonnelController {
     }
     @PutMapping("/activationmultiple")
     public ResponseEntity<String> activationForMultiple(@RequestBody List<Long> ids) {
+        System.out.println("IDs reçus pour activation multiple : " + ids); // Debug log
         try {
             personnelService.activationForMultiple(ids);
             return ResponseEntity.ok("Les statuts des personnels ont été mis à jour avec succès.");
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+            ex.printStackTrace(); // Log complet de l'erreur pour debug
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la mise à jour des statuts.");
         }
     }
+
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<List<PersonnelDTO>> uploadFile(@RequestParam("file") MultipartFile file) {
         try {

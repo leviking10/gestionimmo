@@ -16,6 +16,5 @@ public class OrdinateurDTO extends ImmobilisationDTO {
     private String disqueDur; // Taille en Go
     private String os;
     private String etat;
-    private String utilisateur;
-    private LocalDate dateAffectation;
+    private String numeroSerie;
 }

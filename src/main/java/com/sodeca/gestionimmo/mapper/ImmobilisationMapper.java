@@ -9,58 +9,58 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring", uses = {CategorieMapper.class})
 public interface ImmobilisationMapper {
 
-    // Mapping d'une entité Immobilisation vers un DTO avec récupération dynamique de la durée d'amortissement
-    @Mapping(source = "categorie.id", target = "categorieId")
+    // Mapping d'une entité Immobilisation vers un DTO avec récupération de la désignation et de la durée d'amortissement
+    @Mapping(source = "categorie.categorie", target = "categorieDesignation") // Désignation de la catégorie
     @Mapping(expression = "java(immobilisation.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     ImmobilisationDTO toDTO(Immobilisation immobilisation);
 
-    // Mapping d'un DTO Immobilisation vers une entité
-    @Mapping(source = "categorieId", target = "categorie")
+    // Mapping d'un DTO Immobilisation vers une entité avec récupération de la catégorie par sa désignation
+    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation") // Récupération par désignation
     Immobilisation toEntity(ImmobilisationDTO dto);
 
-    // Conversion spécifique : Telephone -> TelephoneDTO avec durée d'amortissement dynamique
-    @Mapping(source = "categorie.id", target = "categorieId")
+    // Conversion spécifique : Telephone -> TelephoneDTO
+    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
     @Mapping(expression = "java(telephone.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     TelephoneDTO toTelephoneDTO(Telephone telephone);
 
     // Conversion spécifique : TelephoneDTO -> Telephone
-    @Mapping(source = "categorieId", target = "categorie")
+    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     Telephone toTelephone(TelephoneDTO dto);
 
-    // Conversion spécifique : Ordinateur -> OrdinateurDTO avec durée d'amortissement dynamique
-    @Mapping(source = "categorie.id", target = "categorieId")
+    // Conversion spécifique : Ordinateur -> OrdinateurDTO
+    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
     @Mapping(expression = "java(ordinateur.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     OrdinateurDTO toOrdinateurDTO(Ordinateur ordinateur);
 
     // Conversion spécifique : OrdinateurDTO -> Ordinateur
-    @Mapping(source = "categorieId", target = "categorie")
+    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     Ordinateur toOrdinateur(OrdinateurDTO dto);
 
-    // Conversion spécifique : Vehicule -> VehiculeDTO avec durée d'amortissement dynamique
-    @Mapping(source = "categorie.id", target = "categorieId")
+    // Conversion spécifique : Vehicule -> VehiculeDTO
+    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
     @Mapping(expression = "java(vehicule.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     VehiculeDTO toVehiculeDTO(Vehicule vehicule);
 
     // Conversion spécifique : VehiculeDTO -> Vehicule
-    @Mapping(source = "categorieId", target = "categorie")
+    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     Vehicule toVehicule(VehiculeDTO dto);
 
-    // Conversion spécifique : Machine -> MachineDTO avec durée d'amortissement dynamique
-    @Mapping(source = "categorie.id", target = "categorieId")
+    // Conversion spécifique : Machine -> MachineDTO
+    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
     @Mapping(expression = "java(machine.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     MachineDTO toMachineDTO(Machine machine);
 
     // Conversion spécifique : MachineDTO -> Machine
-    @Mapping(source = "categorieId", target = "categorie")
+    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     Machine toMachine(MachineDTO dto);
 
-    // Conversion spécifique : Mobilier -> MobilierDTO avec durée d'amortissement dynamique
-    @Mapping(source = "categorie.id", target = "categorieId")
+    // Conversion spécifique : Mobilier -> MobilierDTO
+    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
     @Mapping(expression = "java(mobilier.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     MobilierDTO toMobilierDTO(Mobilier mobilier);
 
     // Conversion spécifique : MobilierDTO -> Mobilier
-    @Mapping(source = "categorieId", target = "categorie")
+    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     Mobilier toMobilier(MobilierDTO dto);
 
     // Conversion polymorphique : Entité -> DTO
@@ -79,16 +79,6 @@ public interface ImmobilisationMapper {
             return toDTO(immobilisation);
         }
     }
-    // Méthode pour mapper un Long vers une Immobilisation
-    @Named("fromId")
-    default Immobilisation fromId(Long id) {
-        if (id == null) {
-            return null;
-        }
-        Immobilisation immobilisation = new Immobilisation();
-        immobilisation.setId(id);
-        return immobilisation;
-    }
 
     // Conversion polymorphique : DTO -> Entité
     default Immobilisation toPolymorphicEntity(ImmobilisationDTO dto) {
@@ -105,5 +95,27 @@ public interface ImmobilisationMapper {
         } else {
             return toEntity(dto);
         }
+    }
+
+    // Méthode utilitaire pour mapper une désignation de catégorie vers une entité Categorie
+    @Named("fromDesignation")
+    default Categorie fromDesignation(String designation) {
+        if (designation == null) {
+            return null;
+        }
+        Categorie categorie = new Categorie();
+        categorie.setCategorie(designation);
+        return categorie;
+    }
+
+    // Méthode pour mapper un Long vers une Immobilisation
+    @Named("fromId")
+    default Immobilisation fromId(Long id) {
+        if (id == null) {
+            return null;
+        }
+        Immobilisation immobilisation = new Immobilisation();
+        immobilisation.setId(id);
+        return immobilisation;
     }
 }

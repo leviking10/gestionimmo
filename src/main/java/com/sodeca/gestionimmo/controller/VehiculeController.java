@@ -1,5 +1,6 @@
 package com.sodeca.gestionimmo.controller;
 
+import com.sodeca.gestionimmo.dto.MachineDTO;
 import com.sodeca.gestionimmo.dto.VehiculeDTO;
 import com.sodeca.gestionimmo.services.VehiculeService;
 import org.springframework.http.HttpStatus;
@@ -84,5 +85,12 @@ public class VehiculeController {
         } catch (RuntimeException ex) {
             return ResponseEntity.notFound().build();
         }
+    }
+    @PostMapping("/bulk")
+    public ResponseEntity<List<VehiculeDTO>> createVehicules(@RequestBody List<VehiculeDTO> dtos) {
+        List<VehiculeDTO> createVehicules = dtos.stream()
+                .map(vehiculeService::createVehicule)
+                .toList();
+        return ResponseEntity.status(HttpStatus.CREATED).body(createVehicules);
     }
 }

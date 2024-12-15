@@ -66,7 +66,7 @@ public class Immobilisation {
     private StatutAffectation statut = StatutAffectation.DISPONIBLE; // Par défaut DISPONIBLE
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EtatImmobilisation etatImmo = EtatImmobilisation.FONCTIONNEL; // Statut par défaut
+    private EtatImmobilisation etatImmo = EtatImmobilisation.EN_SERVICE; // Statut par défaut
     @CreationTimestamp
     private LocalDateTime createdDate;
 

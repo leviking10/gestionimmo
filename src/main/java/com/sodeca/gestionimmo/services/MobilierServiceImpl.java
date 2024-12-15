@@ -49,9 +49,15 @@ public class MobilierServiceImpl implements MobilierService {
     public MobilierDTO createMobilier(MobilierDTO dto) {
         Mobilier mobilier = mapper.toMobilier(dto);
 
-        // Validation de la catégorie
-        Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+        // Validation de la catégorie par désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérification si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
         mobilier.setCategorie(categorie);
 
         // Génération du QR Code
@@ -75,9 +81,16 @@ public class MobilierServiceImpl implements MobilierService {
         mobilier.setDateAcquisition(dto.getDateAcquisition());
         mobilier.setValeurAcquisition(dto.getValeurAcquisition());
         mobilier.setLocalisation(dto.getLocalisation());
-        // Validation de la catégorie
-        Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+
+        // Validation de la catégorie par désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérification si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
         mobilier.setCategorie(categorie);
 
         // Sauvegarde
@@ -98,9 +111,15 @@ public class MobilierServiceImpl implements MobilierService {
         List<Mobilier> mobiliers = dtos.stream().map(dto -> {
             Mobilier mobilier = mapper.toMobilier(dto);
 
-            // Validation de la catégorie
-            Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+            // Validation de la catégorie par désignation
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+            // Vérification si la catégorie est active
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
+
             mobilier.setCategorie(categorie);
 
             // Génération du QR Code

@@ -44,11 +44,20 @@ public class MachineServiceImpl implements MachineService {
     @Override
     public MachineDTO createMachine(MachineDTO dto) {
         Machine machine = mapper.toMachine(dto);
-        immobilisationService.generateAndAssignQRCode(machine, dto);
 
-        Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
         machine.setCategorie(categorie);
+
+        // Générer et assigner le QR Code
+        immobilisationService.generateAndAssignQRCode(machine, dto);
 
         Machine saved = machineRepository.save(machine);
         return mapper.toMachineDTO(saved);
@@ -59,6 +68,7 @@ public class MachineServiceImpl implements MachineService {
         Machine machine = machineRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Machine non trouvée avec l'ID : " + id));
 
+        // Mise à jour des champs spécifiques
         machine.setTypeMachine(dto.getTypeMachine());
         machine.setPuissance(dto.getPuissance());
         machine.setFabricant(dto.getFabricant());
@@ -68,8 +78,15 @@ public class MachineServiceImpl implements MachineService {
         machine.setValeurAcquisition(dto.getValeurAcquisition());
         machine.setLocalisation(dto.getLocalisation());
 
-        Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
         machine.setCategorie(categorie);
 
         Machine updated = machineRepository.save(machine);
@@ -94,10 +111,18 @@ public class MachineServiceImpl implements MachineService {
         List<Machine> machines = machineDTOS.stream().map(dto -> {
             Machine machine = mapper.toMachine(dto);
 
-            Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+            // Récupérer la catégorie associée par sa désignation
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+            // Vérifier si la catégorie est active
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
+
             machine.setCategorie(categorie);
 
+            // Générer et assigner le QR Code
             immobilisationService.generateAndAssignQRCode(machine, dto);
 
             return machine;

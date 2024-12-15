@@ -17,11 +17,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ImmobilisationDTO {
     private Long id;
-
     @NotBlank(message = "La désignation est obligatoire")
     private String designation;
     @NotBlank(message = "La catégorie est obligatoire")
-    private Long categorieId;// Identifiant de la catégorie
+    private String categorieDesignation;// Identifiant de la catégorie
     private LocalDate dateAcquisition;
     @Positive(message = "La valeur d'acquisition doit être positive")
     private double valeurAcquisition;
@@ -30,5 +29,5 @@ public class ImmobilisationDTO {
     private LocalDate dateMiseEnService;
     private int dureeAmortissement;
     private StatutAffectation statutAffectation=StatutAffectation.DISPONIBLE;
-    private EtatImmobilisation etatImmobilisation=EtatImmobilisation.FONCTIONNEL;
+    private EtatImmobilisation etatImmobilisation=EtatImmobilisation.EN_SERVICE;
 }

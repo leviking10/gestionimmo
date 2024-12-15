@@ -1,12 +1,9 @@
 package com.sodeca.gestionimmo.enums;
 
 public enum EtatImmobilisation {
-    DISPONIBLE,
-    FONCTIONNEL,
-    EN_MAINTENANCE,
     EN_SERVICE,
-    EN_PANNE,
-    EN_REPARATION,
+    EN_MAINTENANCE,
     HORS_SERVICE,
     PLANIFIE,
+    SIGNALE
 }

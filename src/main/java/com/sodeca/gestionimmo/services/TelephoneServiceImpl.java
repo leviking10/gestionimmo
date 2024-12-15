@@ -63,6 +63,18 @@ public class TelephoneServiceImpl implements TelephoneService {
         // Convertir DTO en entité
         Telephone telephone = mapper.toTelephone(dto);
 
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
+        // Assigner la catégorie
+        telephone.setCategorie(categorie);
+
         // Générer et assigner le QR Code via ImmobilisationServiceImpl
         immobilisationService.generateAndAssignQRCode(telephone, dto);
 
@@ -89,19 +101,25 @@ public class TelephoneServiceImpl implements TelephoneService {
         telephone.setType(dto.getType());
         telephone.setImei(dto.getImei());
         telephone.setNumeroSerie(dto.getNumeroSerie());
-        telephone.setEtat(dto.getEtat());
-        telephone.setUtilisateur(dto.getUtilisateur());
         telephone.setDateMiseEnService(dto.getDateMiseEnService());
-
         // Mise à jour des champs communs de la classe mère
         telephone.setDesignation(dto.getDesignation());
         telephone.setDateAcquisition(dto.getDateAcquisition());
         telephone.setLocalisation(dto.getLocalisation());
         telephone.setValeurAcquisition(dto.getValeurAcquisition());
-        // Convertir categorieId en entité Categorie
-        Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
+        // Mise à jour de la catégorie
         telephone.setCategorie(categorie);
+
         Telephone updated = telephoneRepository.save(telephone);
         return mapper.toTelephoneDTO(updated);
     }
@@ -118,10 +136,9 @@ public class TelephoneServiceImpl implements TelephoneService {
         }
         telephoneRepository.deleteById(id);
     }
-
     @Override
     public List<TelephoneDTO> createTelephones(List<ImmobilisationDTO> dtos) {
-        // Vérifier que tous les DTO sont des instances d'OrdinateurDTO
+        // Vérifier que tous les DTO sont des instances de TelephoneDTO
         List<TelephoneDTO> telephoneDTOS = dtos.stream()
                 .filter(dto -> dto instanceof TelephoneDTO)
                 .map(dto -> (TelephoneDTO) dto)
@@ -129,12 +146,19 @@ public class TelephoneServiceImpl implements TelephoneService {
 
         // Convertir les DTOs en entités
         List<Telephone> telephones = telephoneDTOS.stream().map(dto -> {
-            // Convertir DTO en entité Ordinateur
+            // Convertir DTO en entité Telephone
             Telephone telephone = mapper.toTelephone(dto);
 
-            // Récupérer la catégorie associée
-            Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+            // Récupérer la catégorie associée par sa désignation
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
+
+            // Vérifier si la catégorie est active
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
+
+            // Assigner la catégorie
             telephone.setCategorie(categorie);
 
             // Générer et assigner un QR Code

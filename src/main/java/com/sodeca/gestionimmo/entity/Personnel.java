@@ -17,7 +17,7 @@ public class Personnel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-@Column
+@Column(nullable = false, unique = true)
 private String matricule;
     @Column(nullable = false)
     private String nom;
@@ -25,7 +25,7 @@ private String matricule;
     @Column(nullable = false)
     private String prenom;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String telephone;
 
     @Column

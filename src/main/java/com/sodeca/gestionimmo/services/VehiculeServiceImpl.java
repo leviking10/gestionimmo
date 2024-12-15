@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class VehiculeServiceImpl implements VehiculeService {
@@ -32,7 +31,7 @@ public class VehiculeServiceImpl implements VehiculeService {
         return vehiculeRepository.findAll()
                 .stream()
                 .map(mapper::toVehiculeDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -45,6 +44,18 @@ public class VehiculeServiceImpl implements VehiculeService {
     public VehiculeDTO createVehicule(VehiculeDTO dto) {
         // Convertir DTO en entité
         Vehicule vehicule = mapper.toVehicule(dto);
+
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
+        // Assigner la catégorie
+        vehicule.setCategorie(categorie);
 
         // Générer et assigner le QR Code via ImmobilisationServiceImpl
         immobilisationService.generateAndAssignQRCode(vehicule, dto);
@@ -65,8 +76,6 @@ public class VehiculeServiceImpl implements VehiculeService {
         vehicule.setImmatriculation(dto.getImmatriculation());
         vehicule.setKilometrage(dto.getKilometrage());
         vehicule.setDateDerniereRevision(dto.getDateDerniereRevision());
-        vehicule.setEtat(dto.getEtat());
-        vehicule.setUtilisateur(dto.getUtilisateur());
         vehicule.setDateMiseEnService(dto.getDateMiseEnService());
 
         // Mise à jour des champs communs de la classe mère
@@ -74,10 +83,19 @@ public class VehiculeServiceImpl implements VehiculeService {
         vehicule.setDateAcquisition(dto.getDateAcquisition());
         vehicule.setLocalisation(dto.getLocalisation());
         vehicule.setValeurAcquisition(dto.getValeurAcquisition());
-// Convertir categorieId en entité Categorie
-        Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
+        // Assigner la catégorie
         vehicule.setCategorie(categorie);
+
         Vehicule updated = vehiculeRepository.save(vehicule);
         return mapper.toVehiculeDTO(updated);
     }
@@ -88,5 +106,33 @@ public class VehiculeServiceImpl implements VehiculeService {
             throw new RuntimeException("Véhicule non trouvé avec l'ID : " + id);
         }
         vehiculeRepository.deleteById(id);
+    }
+    @Override
+    public List<VehiculeDTO> createVehicules(List<VehiculeDTO> dtos) {
+        List<Vehicule> vehicules = dtos.stream().map(dto -> {
+            Vehicule vehicule = mapper.toVehicule(dto);
+
+            // Validation de la catégorie par désignation
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+            // Vérification si la catégorie est active
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
+
+            vehicule.setCategorie(categorie);
+
+            // Génération du QR Code
+            immobilisationService.generateAndAssignQRCode(vehicule, dto);
+
+            return vehicule;
+        }).toList();
+
+        List<Vehicule> savedVehicules = vehiculeRepository.saveAll(vehicules);
+
+        return savedVehicules.stream()
+                .map(mapper::toVehiculeDTO)
+                .toList();
     }
 }

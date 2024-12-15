@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PersonnelDTO {
-    private Long id;
+    private int id;
     private String matricule;
     private String nom;
     private String prenom;

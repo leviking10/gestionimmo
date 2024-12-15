@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class OrdinateurServiceImpl implements OrdinateurService {
@@ -33,7 +32,7 @@ public class OrdinateurServiceImpl implements OrdinateurService {
         return ordinateurRepository.findAll()
                 .stream()
                 .map(mapper::toOrdinateurDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -46,6 +45,18 @@ public class OrdinateurServiceImpl implements OrdinateurService {
     public OrdinateurDTO createOrdinateur(OrdinateurDTO dto) {
         // Convertir DTO en entité
         Ordinateur ordinateur = mapper.toOrdinateur(dto);
+
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
+        // Assigner la catégorie
+        ordinateur.setCategorie(categorie);
 
         // Générer et assigner le QR Code via ImmobilisationServiceImpl
         immobilisationService.generateAndAssignQRCode(ordinateur, dto);
@@ -60,7 +71,6 @@ public class OrdinateurServiceImpl implements OrdinateurService {
         // Récupérer l'ordinateur existant
         Ordinateur ordinateur = ordinateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ordinateur non trouvé avec l'ID : " + id));
-
         // Mettre à jour les champs spécifiques à Ordinateur
         ordinateur.setMarque(dto.getMarque());
         ordinateur.setModele(dto.getModele());
@@ -69,20 +79,25 @@ public class OrdinateurServiceImpl implements OrdinateurService {
         ordinateur.setDisqueDur(dto.getDisqueDur());
         ordinateur.setOs(dto.getOs());
         ordinateur.setEtat(dto.getEtat());
-        ordinateur.setUtilisateur(dto.getUtilisateur());
+        ordinateur.setNumeroSerie(dto.getNumeroSerie());
         ordinateur.setDateMiseEnService(dto.getDateMiseEnService());
         ordinateur.setType(dto.getType());
-
         // Mettre à jour les champs communs de la classe mère
         ordinateur.setDesignation(dto.getDesignation());
         ordinateur.setLocalisation(dto.getLocalisation());
         ordinateur.setValeurAcquisition(dto.getValeurAcquisition());
-
         ordinateur.setDateAcquisition(dto.getDateAcquisition());
 
-        // Convertir categorieId en entité Categorie
-        Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+        // Récupérer la catégorie associée par sa désignation
+        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+        // Vérifier si la catégorie est active
+        if (!categorie.isActif()) {
+            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+        }
+
+        // Assigner la catégorie
         ordinateur.setCategorie(categorie);
 
         // Sauvegarder les modifications
@@ -102,27 +117,34 @@ public class OrdinateurServiceImpl implements OrdinateurService {
 
     @Override
     public List<OrdinateurDTO> createOrdinateurs(List<ImmobilisationDTO> dtos) {
-        // Vérifier que tous les DTO sont des instances d'OrdinateurDTO
+        // Filtrer les DTOs pour ne garder que les instances d'OrdinateurDTO
         List<OrdinateurDTO> ordinateurDTOs = dtos.stream()
                 .filter(dto -> dto instanceof OrdinateurDTO)
                 .map(dto -> (OrdinateurDTO) dto)
-                .collect(Collectors.toList());
+                .toList();
 
         // Convertir les DTOs en entités
         List<Ordinateur> ordinateurs = ordinateurDTOs.stream().map(dto -> {
             // Convertir DTO en entité Ordinateur
             Ordinateur ordinateur = mapper.toOrdinateur(dto);
 
-            // Récupérer la catégorie associée
-            Categorie categorie = categorieRepository.findById(dto.getCategorieId())
-                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'ID : " + dto.getCategorieId()));
+            // Récupérer la catégorie associée par sa désignation
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec la désignation : " + dto.getCategorieDesignation()));
+
+            // Vérifier si la catégorie est active
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
+
+            // Assigner la catégorie
             ordinateur.setCategorie(categorie);
 
             // Générer et assigner un QR Code
             immobilisationService.generateAndAssignQRCode(ordinateur, dto);
 
             return ordinateur;
-        }).collect(Collectors.toList());
+        }).toList();
 
         // Sauvegarder toutes les entités
         List<Ordinateur> savedOrdinateurs = ordinateurRepository.saveAll(ordinateurs);
@@ -130,7 +152,6 @@ public class OrdinateurServiceImpl implements OrdinateurService {
         // Convertir les entités sauvegardées en DTOs
         return savedOrdinateurs.stream()
                 .map(mapper::toOrdinateurDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
-
 }
