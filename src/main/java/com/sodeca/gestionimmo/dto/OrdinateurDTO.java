@@ -3,12 +3,9 @@ package com.sodeca.gestionimmo.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
-@Setter
 @Getter
+@Setter
 public class OrdinateurDTO extends ImmobilisationDTO {
-    private String type;
     private String marque;
     private String modele;
     private String processeur;

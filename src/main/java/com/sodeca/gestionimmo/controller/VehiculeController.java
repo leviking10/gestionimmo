@@ -1,9 +1,7 @@
 package com.sodeca.gestionimmo.controller;
 
-import com.sodeca.gestionimmo.dto.MachineDTO;
 import com.sodeca.gestionimmo.dto.VehiculeDTO;
 import com.sodeca.gestionimmo.services.VehiculeService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +18,7 @@ public class VehiculeController {
     }
 
     /**
-     * Récupérer tous les véhicules.
-     *
-     * @return Liste des VehiculeDTO.
+     * Récupérer la liste des véhicules.
      */
     @GetMapping
     public List<VehiculeDTO> getAllVehicules() {
@@ -31,9 +27,6 @@ public class VehiculeController {
 
     /**
      * Récupérer un véhicule par ID.
-     *
-     * @param id ID du véhicule.
-     * @return Le véhicule si trouvé, sinon 404.
      */
     @GetMapping("/{id}")
     public ResponseEntity<VehiculeDTO> getVehiculeById(@PathVariable Long id) {
@@ -43,54 +36,10 @@ public class VehiculeController {
     }
 
     /**
-     * Créer un nouveau véhicule.
-     *
-     * @param dto VehiculeDTO à créer.
-     * @return Le véhicule créé avec un statut 201 (CREATED).
-     */
-    @PostMapping
-    public ResponseEntity<VehiculeDTO> createVehicule(@RequestBody VehiculeDTO dto) {
-        VehiculeDTO createdVehicule = vehiculeService.createVehicule(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdVehicule);
-    }
-
-    /**
-     * Mettre à jour un véhicule existant.
-     *
-     * @param id  ID du véhicule à mettre à jour.
-     * @param dto VehiculeDTO contenant les nouvelles données.
-     * @return Le véhicule mis à jour ou 404 si non trouvé.
+     * Mettre à jour les champs techniques d'un véhicule.
      */
     @PutMapping("/{id}")
     public ResponseEntity<VehiculeDTO> updateVehicule(@PathVariable Long id, @RequestBody VehiculeDTO dto) {
-        try {
-            VehiculeDTO updatedVehicule = vehiculeService.updateVehicule(id, dto);
-            return ResponseEntity.ok(updatedVehicule);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
-     * Supprimer un véhicule par ID.
-     *
-     * @param id ID du véhicule à supprimer.
-     * @return Une réponse avec le statut 204 (NO CONTENT) si réussi.
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVehicule(@PathVariable Long id) {
-        try {
-            vehiculeService.deleteVehicule(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException ex) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-    @PostMapping("/bulk")
-    public ResponseEntity<List<VehiculeDTO>> createVehicules(@RequestBody List<VehiculeDTO> dtos) {
-        List<VehiculeDTO> createVehicules = dtos.stream()
-                .map(vehiculeService::createVehicule)
-                .toList();
-        return ResponseEntity.status(HttpStatus.CREATED).body(createVehicules);
+        return ResponseEntity.ok(vehiculeService.updateVehicule(id, dto));
     }
 }

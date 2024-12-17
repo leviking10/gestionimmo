@@ -13,6 +13,7 @@ import com.sodeca.gestionimmo.enums.StatutCession;
 import com.sodeca.gestionimmo.mapper.ImmobilisationMapper;
 import com.sodeca.gestionimmo.repository.CategorieRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -39,7 +40,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     public List<ImmobilisationDTO> getAllImmobilisations() {
         return immobilisationRepository.findAll()
                 .stream()
-                .map(mapper::toPolymorphicDTO) // Utiliser la conversion polymorphique
+                .map(mapper::toPolymorphicDTO)
                 .toList();
     }
 
@@ -48,6 +49,72 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         return immobilisationRepository.findById(id)
                 .map(mapper::toPolymorphicDTO);
     }
+    // Méthode pour générer un code séquentiel au format CODE00001
+    private String generateSequentialCodeImmo() {
+        // Récupérer le dernier code existant dans la base
+        String dernierCode = immobilisationRepository.findTopByOrderByCodeImmoDesc()
+                .map(Immobilisation::getCodeImmo)
+                .orElse("CODE00001"); // Si aucun code n'existe, commencer à CODE00001
+
+        // Extraire la partie numérique et incrémenter
+        int numero = Integer.parseInt(dernierCode.replace("CODE", "")) + 1;
+
+        // Formater le code en CODE00001
+        return String.format("CODE%05d", numero);
+    }
+    @Override
+    public List<ImmobilisationDTO> createImmobilisations(List<ImmobilisationDTO> dtos) {
+        List<Immobilisation> immobilisations = dtos.stream().map(dto -> {
+            // Récupérer la catégorie par désignation
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
+
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
+
+            // Convertir le DTO en entité
+            Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
+            immobilisation.setCategorie(categorie);
+
+            // Générer un code d'immobilisation unique au format CODE00001
+            if (dto.getCodeImmo() == null || dto.getCodeImmo().isEmpty()) {
+                immobilisation.setCodeImmo(generateSequentialCodeImmo());
+            } else {
+                if (immobilisationRepository.findByCodeImmo(dto.getCodeImmo()).isPresent()) {
+                    throw new RuntimeException("Le code d'immobilisation est déjà utilisé : " + dto.getCodeImmo());
+                }
+                immobilisation.setCodeImmo(dto.getCodeImmo());
+            }
+
+            // Générer et assigner un QR Code
+            generateAndAssignQRCode(immobilisation);
+
+            return immobilisation;
+        }).toList();
+
+        // Sauvegarder toutes les immobilisations
+        List<Immobilisation> savedImmobilisations = immobilisationRepository.saveAll(immobilisations);
+
+        // Convertir en DTO et retourner
+        return savedImmobilisations.stream()
+                .map(mapper::toPolymorphicDTO)
+                .toList();
+    }
+
+
+
+    private void generateAndAssignQRCode(Immobilisation immobilisation) {
+        try {
+            String qrCodeData = "https://gestionimmo.sodeca.com/immobilisation/" + immobilisation.getCodeImmo();
+            String qrCodeBase64 = generateQRCode(qrCodeData);
+            immobilisation.setQrCode(qrCodeBase64);
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la génération du QR Code", e);
+        }
+    }
+
+
     @Override
     public ImmobilisationDTO createImmobilisation(ImmobilisationDTO dto) {
         // Récupérer la catégorie par désignation
@@ -62,6 +129,16 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         // Convertir le DTO en entité
         Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
         immobilisation.setCategorie(categorie);
+        // Vérifier si le code est fourni, sinon le générer automatiquement
+        if (dto.getCodeImmo() == null || dto.getCodeImmo().isEmpty()) {
+            immobilisation.setCodeImmo(generateUniqueCodeImmo());
+        } else {
+            // Vérifier l'unicité du code fourni
+            if (immobilisationRepository.findByCodeImmo(dto.getCodeImmo()).isPresent()) {
+                throw new RuntimeException("Le code d'immobilisation est déjà utilisé : " + dto.getCodeImmo());
+            }
+            immobilisation.setCodeImmo(dto.getCodeImmo());
+        }
 
         // Sauvegarder l'immobilisation dans la base de données
         Immobilisation savedImmobilisation = immobilisationRepository.save(immobilisation);
@@ -69,30 +146,77 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         // Générer et assigner un QR Code si nécessaire
         if (savedImmobilisation.getQrCode() == null || savedImmobilisation.getQrCode().isEmpty()) {
             try {
-                String qrCodeData = "https://gestionimmo.sodeca.com/immobilisation/" + savedImmobilisation.getId();
+                String qrCodeData = "https://gestionimmo.sodeca.com/immobilisation/" + savedImmobilisation.getCodeImmo();
                 String qrCodeBase64 = generateQRCode(qrCodeData);
                 savedImmobilisation.setQrCode(qrCodeBase64);
-                immobilisationRepository.save(savedImmobilisation); // Mettre à jour avec le QR Code
+                immobilisationRepository.save(savedImmobilisation);
+                System.out.println("Type dans DTO : " + dto.getType());
             } catch (Exception e) {
                 throw new RuntimeException("Erreur lors de la génération du QR Code", e);
             }
         }
 
         return mapper.toPolymorphicDTO(savedImmobilisation);
+
     }
+    @Override
+    @Transactional
+    public ImmobilisationDTO updateImmobilisation(Long id, ImmobilisationDTO dto) {
+        // Récupérer l'immobilisation existante
+        Immobilisation ancienneImmobilisation = immobilisationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + id));
+
+        // Vérifier si le type a changé
+        if (dto.getType() != null && !dto.getType().equals(ancienneImmobilisation.getType())) {
+            // Supprimer l'ancien enregistrement (avec les données spécifiques)
+            immobilisationRepository.delete(ancienneImmobilisation);
+
+            // Créer une nouvelle immobilisation avec le nouveau type
+            Immobilisation nouvelleImmobilisation = mapper.toPolymorphicEntity(dto);
+
+            // Associer la même catégorie si elle n'est pas modifiée
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable : " + dto.getCategorieDesignation()));
+            nouvelleImmobilisation.setCategorie(categorie);
+
+            // Conserver l'ID et le code unique pour ne pas casser les relations
+            nouvelleImmobilisation.setId(id);
+            nouvelleImmobilisation.setCodeImmo(ancienneImmobilisation.getCodeImmo());
+
+            // Sauvegarder la nouvelle immobilisation
+            Immobilisation savedImmobilisation = immobilisationRepository.save(nouvelleImmobilisation);
+            return mapper.toPolymorphicDTO(savedImmobilisation);
+        }
+
+        // Mise à jour des champs génériques (ignorer le champ codeImmo)
+        ancienneImmobilisation.setDesignation(dto.getDesignation());
+        ancienneImmobilisation.setDateAcquisition(dto.getDateAcquisition());
+        ancienneImmobilisation.setLocalisation(dto.getLocalisation());
+        ancienneImmobilisation.setDateMiseEnService(dto.getDateMiseEnService());
+        ancienneImmobilisation.setValeurAcquisition(dto.getValeurAcquisition());
+        ancienneImmobilisation.setEtatImmo(dto.getEtatImmobilisation());
+
+        // Mise à jour de la catégorie
+        if (dto.getCategorieDesignation() != null) {
+            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
+            ancienneImmobilisation.setCategorie(categorie);
+        }
+
+        // Sauvegarder l'immobilisation mise à jour
+        Immobilisation updatedImmobilisation = immobilisationRepository.save(ancienneImmobilisation);
+        return mapper.toPolymorphicDTO(updatedImmobilisation);
+    }
+
 
     @Override
     public void deleteImmobilisation(Long id) {
         immobilisationRepository.deleteById(id);
     }
-    @Override
-    public void updateEtat(Long immobilisationId, EtatImmobilisation nouvelEtat) {
-        Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + immobilisationId));
 
-        immobilisation.setEtatImmo(nouvelEtat);
-        immobilisationRepository.save(immobilisation);
-    }
     @Override
     public byte[] getQRCodeAsImage(Long id) {
         Immobilisation immobilisation = immobilisationRepository.findById(id)
@@ -106,67 +230,63 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     }
 
     @Override
+    public byte[] downloadQRCode(Long id) {
+        Immobilisation immobilisation = immobilisationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + id));
+
+        if (immobilisation.getQrCode() == null || immobilisation.getQrCode().isEmpty()) {
+            throw new RuntimeException("Le QR Code pour cette immobilisation n'existe pas.");
+        }
+
+        return Base64.getDecoder().decode(immobilisation.getQrCode());
+    }
+
+    @Override
+    public ImmobilisationDTO getImmobilisationByCode(String codeImmo) {
+        Immobilisation immobilisation = immobilisationRepository.findByCodeImmo(codeImmo)
+                .orElseThrow(() -> new RuntimeException("Aucune immobilisation trouvée avec le code : " + codeImmo));
+        return mapper.toPolymorphicDTO(immobilisation);
+    }
+    @Override
     public List<ImmobilisationDTO> getImmobilisationsCedees() {
-        // Rechercher les immobilisations ayant un statut de cession défini
-        List<Immobilisation> immobilisationsCedees = immobilisationRepository.findAll().stream()
+        return immobilisationRepository.findAll().stream()
                 .filter(immobilisation -> immobilisation.getStatutCession() == StatutCession.VENDU ||
                         immobilisation.getStatutCession() == StatutCession.REBUTE)
-                .toList();
-
-        // Convertir en DTO et retourner la liste
-        return immobilisationsCedees.stream()
                 .map(mapper::toPolymorphicDTO)
                 .toList();
     }
 
     @Override
     public ImmobilisationDTO getImmobilisationByQRCode(String qrCodeData) {
-        // Décoder les données du QR Code pour extraire l'identifiant
         String immobilisationId = extractIdFromQRCode(qrCodeData);
 
-        // Récupérer l'immobilisation par son ID
         Immobilisation immobilisation = immobilisationRepository.findById(Long.parseLong(immobilisationId))
                 .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + immobilisationId));
 
-        // Convertir l'entité en DTO
         return mapper.toPolymorphicDTO(immobilisation);
     }
 
-    // Méthode utilitaire pour extraire l'ID depuis le QR Code
     private String extractIdFromQRCode(String qrCodeData) {
-        // Exemple de traitement basique : extraire l'ID depuis une URL dans le QR Code
         String[] parts = qrCodeData.split("/");
-        return parts[parts.length - 1]; // Dernier segment de l'URL
+        return parts[parts.length - 1];
     }
 
-    // Méthode utilitaire pour générer et assigner un QR Code
-    void generateAndAssignQRCode(Immobilisation immobilisation, ImmobilisationDTO dto) {
-        try {
-            String qrCodeData = "ID: " + dto.getId() + ", Désignation: " + dto.getDesignation() + ", Catégorie: " + immobilisation.getCategorie();
-            String qrCode = generateQRCode(qrCodeData);
-            immobilisation.setQrCode(qrCode);
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la génération du QR Code", e);
-        }
+    private String generateUniqueCodeImmo() {
+        String code;
+        do {
+            code = "IMMO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } while (immobilisationRepository.findByCodeImmo(code).isPresent());
+        return code;
     }
-
-
-
     @Override
-    public byte[] downloadQRCode(Long id) {
-        Immobilisation immobilisation = immobilisationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + id));
+    public void updateEtat(Long immobilisationId, EtatImmobilisation nouvelEtat) {
+        Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
+                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + immobilisationId));
 
-        // Vérifier si le QR Code existe
-        if (immobilisation.getQrCode() == null || immobilisation.getQrCode().isEmpty()) {
-            throw new RuntimeException("Le QR Code pour cette immobilisation n'existe pas.");
-        }
-
-        // Décoder et retourner le QR Code
-        return Base64.getDecoder().decode(immobilisation.getQrCode());
+        immobilisation.setEtatImmo(nouvelEtat);
+        immobilisationRepository.save(immobilisation);
     }
 
-    // Méthode utilitaire pour générer le QR Code
     private String generateQRCode(String text) throws Exception {
         int width = 250;
         int height = 250;
@@ -187,63 +307,5 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(qrImage, "PNG", outputStream);
         return Base64.getEncoder().encodeToString(outputStream.toByteArray());
-    }
-    @Override
-    public List<ImmobilisationDTO> createImmobilisations(List<ImmobilisationDTO> dtos) {
-        List<Immobilisation> immobilisations = dtos.stream().map(dto -> {
-            // Récupérer la catégorie par désignation
-            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
-                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
-
-            // Vérifier si la catégorie est active
-            if (!categorie.isActif()) {
-                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
-            }
-
-            // Convertir le DTO en entité
-            Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
-            immobilisation.setCategorie(categorie);
-
-            // Générer et assigner un QR Code
-            generateAndAssignQRCode(immobilisation, dto);
-
-            return immobilisation;
-        }).toList();
-
-        // Sauvegarder toutes les immobilisations
-        List<Immobilisation> savedImmobilisations = immobilisationRepository.saveAll(immobilisations);
-
-        // Retourner la liste des DTOs sauvegardés
-        return savedImmobilisations.stream()
-                .map(mapper::toPolymorphicDTO)
-                .toList();
-    }
-
-    @Override
-    public ImmobilisationDTO updateImmobilisation(Long id, ImmobilisationDTO dto) {
-        Immobilisation immobilisation = immobilisationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cette immobilisation n'existe pas"));
-
-        // Mise à jour des champs communs
-        immobilisation.setDesignation(dto.getDesignation());
-
-        // Mise à jour de la catégorie par désignation si nécessaire
-        if (dto.getCategorieDesignation() != null) {
-            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
-                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
-
-            if (!categorie.isActif()) {
-                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
-            }
-
-            immobilisation.setCategorie(categorie);
-        }
-
-        immobilisation.setDateAcquisition(dto.getDateAcquisition());
-        immobilisation.setLocalisation(dto.getLocalisation());
-        immobilisation.setDateMiseEnService(dto.getDateMiseEnService());
-
-        Immobilisation updated = immobilisationRepository.save(immobilisation);
-        return mapper.toPolymorphicDTO(updated);
     }
 }

@@ -20,6 +20,8 @@ public interface ImmobilisationService {
     ImmobilisationDTO updateImmobilisation(Long id, ImmobilisationDTO dto);
     // Méthodes pour les cessions
 
+    ImmobilisationDTO getImmobilisationByCode(String codeImmo);
+
     List<ImmobilisationDTO> getImmobilisationsCedees();
 
     byte[] getQRCodeAsImage(Long id);

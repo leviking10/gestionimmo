@@ -1,4 +1,6 @@
 package com.sodeca.gestionimmo.entity;
+import com.sodeca.gestionimmo.enums.TypeImmobilisation;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,11 +9,11 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
+@Setter
 @AllArgsConstructor
+@DiscriminatorValue("MACHINE")
 public class Machine extends Immobilisation {
-    private String typeMachine; // Exemple : Remplisseuse, Souffleuse
     private String puissance; // Exemple : 5 kW, 10 kW
     private String fabricant; // Nom du fabricant
     private String numeroSerie; // Numéro de série unique

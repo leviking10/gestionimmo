@@ -5,8 +5,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Setter
 @Getter
+@Setter
 public class VehiculeDTO extends ImmobilisationDTO {
     private String immatriculation;
     private String marque;

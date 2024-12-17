@@ -3,6 +3,7 @@ package com.sodeca.gestionimmo.entity;
 import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 import com.sodeca.gestionimmo.enums.StatutCession;
 import com.sodeca.gestionimmo.enums.StatutAffectation;
+import com.sodeca.gestionimmo.enums.TypeImmobilisation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,14 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Inheritance(strategy = InheritanceType.JOINED) // Permet de créer une table par classe fille
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 public class Immobilisation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, unique = true) // Unicité du code d'immobilisation
+    private String codeImmo; // Code unique pour l'immobilisation
 
     @Column(nullable = false)
     private String designation;
@@ -72,5 +76,22 @@ public class Immobilisation {
 
     @UpdateTimestamp
     private LocalDateTime lastModifiedDate;
+    // Champ "type" basé sur la colonne discriminante
+    @Transient
+    private TypeImmobilisation type;
+
+    // Getter pour "type"
+    public TypeImmobilisation getType() {
+        if (this.getClass().isAnnotationPresent(DiscriminatorValue.class)) {
+            String discriminatorValue = this.getClass().getAnnotation(DiscriminatorValue.class).value();
+            return TypeImmobilisation.valueOf(discriminatorValue.toUpperCase());
+        }
+        return null;
+    }
+
+    // Setter pour "type"
+    public void setType(TypeImmobilisation type) {
+        this.type = type;
+    }
 
 }

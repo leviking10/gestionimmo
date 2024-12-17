@@ -14,15 +14,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Entity
 @Table(name = "vehicules")
+@DiscriminatorValue("VEHICULE")
 public class Vehicule extends Immobilisation {
-
-    @Column(nullable = false)
+    @Column
     private String immatriculation;
-
-    @Column(nullable = false)
+    @Column
     private String marque;
 
-    @Column(nullable = false)
+    @Column
     private String modele;
     @Column
     private String kilometrage;

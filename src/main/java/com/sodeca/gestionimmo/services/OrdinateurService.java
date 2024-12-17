@@ -1,6 +1,5 @@
 package com.sodeca.gestionimmo.services;
 
-import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.dto.OrdinateurDTO;
 
 import java.util.List;
@@ -16,42 +15,26 @@ public interface OrdinateurService {
     List<OrdinateurDTO> getAllOrdinateurs();
 
     /**
-     * Récupérer un ordinateur par ID.
+     * Récupérer un ordinateur par son identifiant.
      *
-     * @param id ID de l'ordinateur.
-     * @return Un Optional contenant le OrdinateurDTO si trouvé.
+     * @param id Identifiant de l'ordinateur.
+     * @return OrdinateurDTO s'il existe.
      */
     Optional<OrdinateurDTO> getOrdinateurById(Long id);
 
     /**
-     * Créer un nouvel ordinateur.
+     * Mettre à jour les détails techniques d'un ordinateur.
      *
-     * @param dto OrdinateurDTO à créer.
-     * @return Le OrdinateurDTO créé.
-     */
-    OrdinateurDTO createOrdinateur(OrdinateurDTO dto);
-
-    /**
-     * Mettre à jour un ordinateur existant.
-     *
-     * @param id  ID de l'ordinateur à mettre à jour.
-     * @param dto OrdinateurDTO contenant les nouvelles données.
-     * @return Le OrdinateurDTO mis à jour.
+     * @param id  Identifiant de l'ordinateur.
+     * @param dto DTO contenant les informations techniques à mettre à jour.
+     * @return OrdinateurDTO mis à jour.
      */
     OrdinateurDTO updateOrdinateur(Long id, OrdinateurDTO dto);
 
     /**
-     * Supprimer un ordinateur par ID.
+     * Récupérer une liste d'ordinateurs selon des critères spécifiques.
      *
-     * @param id ID de l'ordinateur à supprimer.
+     * @return Liste des OrdinateurDTO.
      */
-    void deleteOrdinateur(Long id);
-
-    /**
-     * Créer une liste d'ordinateurs.
-     *
-     * @param dtos Liste des OrdinateurDTO à créer.
-     * @return Liste des OrdinateurDTO créés.
-     */
-    List<OrdinateurDTO> createOrdinateurs(List<ImmobilisationDTO> dtos);
+    List<OrdinateurDTO> getOrdinateursByCriteria();
 }

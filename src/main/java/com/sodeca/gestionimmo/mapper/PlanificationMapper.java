@@ -19,7 +19,7 @@ public interface PlanificationMapper {
     PlanificationDTO toDTO(Planification planification);
 
     // Mapping d'un DTO Planification vers une entité
-    @Mapping(source = "immobilisationId", target = "immobilisation", qualifiedByName = "fromId")
+    @Mapping(source = "immobilisationId", target = "immobilisation")
     @Mapping(source = "technicienIds", target = "techniciens", qualifiedByName = "idsToTechniciens")
     Planification toEntity(PlanificationDTO dto);
 
@@ -40,5 +40,13 @@ public interface PlanificationMapper {
                     personnel.setId(id);
                     return personnel;
                 }).toList() : null;
+    }
+    default Planification fromId(Long id) {
+        if (id == null) {
+            return null;
+        }
+        Planification planification = new Planification();
+        planification.setId(id);
+        return planification;
     }
 }

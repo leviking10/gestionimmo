@@ -1,6 +1,8 @@
 package com.sodeca.gestionimmo.entity;
 
+import com.sodeca.gestionimmo.enums.TypeImmobilisation;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -12,12 +14,12 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "ordinateurs")
+@DiscriminatorValue("ORDINATEUR")
 public class Ordinateur extends Immobilisation {
-    private String type;
     private String marque;
     private String modele;
     private String processeur;
@@ -25,6 +27,6 @@ public class Ordinateur extends Immobilisation {
     private String disqueDur;
     private String os;
     private String etat;
-    @Column(unique = true, nullable = false) // Rend le champ unique et non null
+    @Column(unique = true) // Rend le champ unique et non null
     private String numeroSerie;
 }
