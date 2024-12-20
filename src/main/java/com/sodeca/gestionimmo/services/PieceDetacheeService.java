@@ -9,18 +9,27 @@ import java.io.IOException;
 import java.util.List;
 
 public interface PieceDetacheeService {
-    PieceDetacheeDTO createPiece(PieceDetacheeDTO dto);
-    PieceDetacheeDTO updatePiece(Long id, PieceDetacheeDTO dto);
-    void deletePiece(Long id);
-    PieceDetacheeDTO getPieceById(Long id);
-    List<PieceDetacheeDTO> getAllPieces();
-    List<InventaireDTO> getInventaire(); // Obtenir l'inventaire
 
 
-    MouvementStockDTO validerDemande(Long demandeId);
-    List<MouvementStockDTO> getMouvementsByPiece(Long pieceId);
-
-    // Importation des pièces depuis un fichier
     List<PieceDetacheeDTO> importPiecesFromFile(MultipartFile file) throws IOException;
 
+    PieceDetacheeDTO createPiece(PieceDetacheeDTO dto);
+
+    PieceDetacheeDTO updatePiece(Long id, PieceDetacheeDTO dto);
+
+    void deletePiece(Long id);
+
+    PieceDetacheeDTO getPieceById(Long id);
+
+    List<PieceDetacheeDTO> getAllPieces();
+
+    List<MouvementStockDTO> getMouvementsByPiece(Long pieceId);
+
+    List<MouvementStockDTO> importApprovisionnements(MultipartFile file) throws IOException;
+
+    MouvementStockDTO approvisionnement(Long pieceId, int quantite, String commentaire);
+
+    MouvementStockDTO validerDemande(Long demandeId);
+
+    List<InventaireDTO> getInventaire();
 }

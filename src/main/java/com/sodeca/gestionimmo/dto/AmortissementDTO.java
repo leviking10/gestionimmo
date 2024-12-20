@@ -13,8 +13,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AmortissementDTO {
-
-    @Getter
     private int id; // ID de l'amortissement
     private Long idImmobilisation; // ID de l'immobilisation associée
     private String methode; // Méthode d'amortissement (ex. Linéaire)

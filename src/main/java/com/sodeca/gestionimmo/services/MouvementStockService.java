@@ -1,19 +1,8 @@
 package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.MouvementStockDTO;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.List;
 public interface MouvementStockService {
-
-    /**
-     * Enregistrer un mouvement de stock.
-     *
-     * @param dto Mouvement de stock à enregistrer.
-     * @return Mouvement de stock enregistré.
-     */
-    MouvementStockDTO enregistrerMouvement(MouvementStockDTO dto);
 
     /**
      * Obtenir tous les mouvements de stock.
@@ -37,5 +26,4 @@ public interface MouvementStockService {
      * @return Liste des mouvements de stock associés à la pièce.
      */
     List<MouvementStockDTO> getMouvementsByReference(String reference);
-    List<MouvementStockDTO> importStockMovements(MultipartFile file) throws IOException;
 }

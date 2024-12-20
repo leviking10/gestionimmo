@@ -6,6 +6,7 @@ import com.sodeca.gestionimmo.entity.Immobilisation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -34,4 +35,12 @@ public interface SignalementRepository extends JpaRepository<Signalement, Long> 
      * @return Liste des signalements récents.
      */
     List<Signalement> findByImmobilisationOrderByDateSignalementDesc(Immobilisation immobilisation);
+/**
+     * Trouver tous les signalements faits entre deux dates données.
+     *
+     * @param startDate Date de début.
+     * @param endDate Date de fin.
+     * @return Liste des signalements.
+     */
+    List<Signalement> findByDateSignalementBetween(LocalDateTime startDate, LocalDateTime endDate);
 }

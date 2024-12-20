@@ -15,6 +15,7 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
     @Override
     public List<Amortissement> calculerAmortissements(Immobilisation immobilisation, Optional<Amortissement> dernierAmortissement) {
         List<Amortissement> amortissements = new ArrayList<>();
+
         double valeurComptable = dernierAmortissement.map(Amortissement::getValeurNette)
                 .orElse(immobilisation.getValeurAcquisition());
         int dureeAmortissement = immobilisation.getCategorie().getDureeAmortissement();
@@ -32,22 +33,33 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
                 .orElse(LocalDate.of(immobilisation.getDateAcquisition().getYear(), 1, 1));
 
         for (int i = 0; i < dureeRestante; i++) {
-            double montantAmorti = montantAnnuel;
+            double montantAmorti = (i == 0 && isProrataApplicable(immobilisation, dateDebutExercice))
+                    ? prorataCalcul(immobilisation, montantAnnuel)
+                    : montantAnnuel;
+
             valeurComptable -= montantAmorti;
 
-            Amortissement amortissement = new Amortissement();
-            amortissement.setImmobilisation(immobilisation);
-            amortissement.setMethode("Linéaire");
-            amortissement.setMontantAmorti(round(montantAmorti, 2));
-            amortissement.setDateDebutExercice(dateDebutExercice.plusYears(i));
-            amortissement.setDateCalcul(dateDebutExercice.plusYears(i + 1).minusDays(1));
-            amortissement.setValeurNette(round(Math.max(valeurComptable, 0.0), 2));
-            amortissement.setStatut(i == dureeRestante - 1 ? StatutAmmortissement.AMMORTI : StatutAmmortissement.EN_COURS);
-
-            amortissements.add(amortissement);
+            amortissements.add(Amortissement.builder()
+                    .immobilisation(immobilisation)
+                    .methode("Linéaire")
+                    .montantAmorti(round(montantAmorti, 2))
+                    .dateDebutExercice(dateDebutExercice.plusYears(i))
+                    .dateCalcul(dateDebutExercice.plusYears(i + 1).minusDays(1))
+                    .valeurNette(round(Math.max(valeurComptable, 0.0), 2))
+                    .statut(i == dureeRestante - 1 ? StatutAmmortissement.AMMORTI : StatutAmmortissement.EN_COURS)
+                    .build());
         }
 
         return amortissements;
+    }
+
+    private boolean isProrataApplicable(Immobilisation immobilisation, LocalDate dateDebutExercice) {
+        return !dateDebutExercice.isEqual(immobilisation.getDateAcquisition());
+    }
+
+    private double prorataCalcul(Immobilisation immobilisation, double montantAnnuel) {
+        int joursRestants = 365 - immobilisation.getDateAcquisition().getDayOfYear() + 1;
+        return (montantAnnuel * joursRestants) / 365;
     }
 
     private double round(double value, int places) {

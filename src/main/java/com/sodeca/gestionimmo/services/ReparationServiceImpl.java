@@ -8,6 +8,7 @@ import com.sodeca.gestionimmo.repository.ReparationRepository;
 import com.sodeca.gestionimmo.repository.VehiculeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -39,6 +40,57 @@ public class ReparationServiceImpl implements ReparationService {
         return repository.findByVehiculeIdOrderByDateDesc(vehiculeId).stream()
                 .map(mapper::toDTO)
                 .toList();
+    }
+    @Override
+    public List<ReparationDTO> getAllReparations() {
+        return repository.findAll().stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ReparationDTO> getReparationsByType(String typeReparation) {
+        return repository.findByTypeReparation(typeReparation).stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ReparationDTO> getReparationsByFournisseur(String fournisseur) {
+        return repository.findByFournisseur(fournisseur).stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ReparationDTO> getReparationsByDateRange(LocalDate startDate, LocalDate endDate) {
+        return repository.findByDateBetween(startDate, endDate).stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public ReparationDTO updateReparation(Long id, ReparationDTO dto) {
+        Reparation reparation = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Réparation introuvable"));
+        reparation.setDate(dto.getDate());
+        reparation.setDescription(dto.getDescription());
+        reparation.setCout(dto.getCout());
+        reparation.setFournisseur(dto.getFournisseur());
+        reparation.setKilometrage(dto.getKilometrage());
+        reparation.setTypeReparation(dto.getTypeReparation());
+        return mapper.toDTO(repository.save(reparation));
+    }
+    @Override
+    public ReparationDTO getReparationById(Long id) {
+        Reparation reparation = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Réparation introuvable avec l'ID : " + id));
+        return mapper.toDTO(reparation);
+    }
+
+    @Override
+    public void deleteReparation(Long id) {
+        repository.deleteById(id);
     }
 
     @Override

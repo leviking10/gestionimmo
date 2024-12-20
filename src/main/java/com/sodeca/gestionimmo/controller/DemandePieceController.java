@@ -18,38 +18,105 @@ public class DemandePieceController {
         this.service = service;
     }
 
+    /**
+     * Créer une nouvelle demande.
+     *
+     * @param dto DemandePieceDTO contenant les informations nécessaires.
+     * @return La demande créée.
+     */
     @PostMapping
     public ResponseEntity<DemandePieceDTO> createDemande(@RequestBody DemandePieceDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createDemande(dto));
+        try {
+            DemandePieceDTO createdDemande = service.createDemande(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdDemande);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
+    /**
+     * Valider une demande existante.
+     *
+     * @param id ID de la demande à valider.
+     * @return La demande validée.
+     */
     @PutMapping("/{id}/valider")
     public ResponseEntity<DemandePieceDTO> validerDemande(@PathVariable Long id) {
-        return ResponseEntity.ok(service.validerDemande(id));
+        try {
+            DemandePieceDTO validatedDemande = service.validerDemande(id);
+            return ResponseEntity.ok(validatedDemande);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
+    /**
+     * Annuler une demande existante.
+     *
+     * @param id ID de la demande à annuler.
+     * @return La demande annulée.
+     */
     @PutMapping("/{id}/annuler")
     public ResponseEntity<DemandePieceDTO> annulerDemande(@PathVariable Long id) {
-        return ResponseEntity.ok(service.annulerDemande(id));
+        try {
+            DemandePieceDTO cancelledDemande = service.annulerDemande(id);
+            return ResponseEntity.ok(cancelledDemande);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
+    /**
+     * Récupérer toutes les demandes.
+     *
+     * @return Liste de toutes les demandes.
+     */
     @GetMapping
     public ResponseEntity<List<DemandePieceDTO>> getAllDemandes() {
-        return ResponseEntity.ok(service.getAllDemandes());
+        List<DemandePieceDTO> demandes = service.getAllDemandes();
+        return ResponseEntity.ok(demandes);
     }
 
+    /**
+     * Récupérer les demandes par technicien.
+     *
+     * @param technicienId ID du technicien.
+     * @return Liste des demandes pour ce technicien.
+     */
     @GetMapping("/technicien/{technicienId}")
     public ResponseEntity<List<DemandePieceDTO>> getDemandesByTechnicien(@PathVariable Long technicienId) {
-        return ResponseEntity.ok(service.getDemandesByTechnicien(technicienId));
+        try {
+            List<DemandePieceDTO> demandes = service.getDemandesByTechnicien(technicienId);
+            return ResponseEntity.ok(demandes);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
+    /**
+     * Récupérer les demandes par pièce.
+     *
+     * @param pieceId ID de la pièce.
+     * @return Liste des demandes pour cette pièce.
+     */
     @GetMapping("/piece/{pieceId}")
     public ResponseEntity<List<DemandePieceDTO>> getDemandesByPiece(@PathVariable Long pieceId) {
-        return ResponseEntity.ok(service.getDemandesByPiece(pieceId));
+        try {
+            List<DemandePieceDTO> demandes = service.getDemandesByPiece(pieceId);
+            return ResponseEntity.ok(demandes);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
+    /**
+     * Récupérer les demandes non validées.
+     *
+     * @return Liste des demandes non validées.
+     */
     @GetMapping("/non-validees")
     public ResponseEntity<List<DemandePieceDTO>> getDemandesNonValidees() {
-        return ResponseEntity.ok(service.getDemandesNonValidees());
+        List<DemandePieceDTO> nonValidees = service.getDemandesNonValidees();
+        return ResponseEntity.ok(nonValidees);
     }
 }

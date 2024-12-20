@@ -38,15 +38,12 @@ public class VehiculeServiceImpl implements VehiculeService {
     public VehiculeDTO updateVehicule(Long id, VehiculeDTO dto) {
         Vehicule vehicule = vehiculeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Véhicule non trouvé avec l'ID : " + id));
-
         // Mise à jour des champs techniques
         vehicule.setImmatriculation(dto.getImmatriculation());
         vehicule.setMarque(dto.getMarque());
         vehicule.setModele(dto.getModele());
         vehicule.setKilometrage(dto.getKilometrage());
         vehicule.setDateDerniereRevision(dto.getDateDerniereRevision());
-        vehicule.setDateMiseEnService(dto.getDateMiseEnService());
-
         Vehicule updated = vehiculeRepository.save(vehicule);
         return mapper.toVehiculeDTO(updated);
     }

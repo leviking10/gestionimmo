@@ -1,7 +1,5 @@
 package com.sodeca.gestionimmo.services;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvValidationException;
 import com.sodeca.gestionimmo.dto.InventaireDTO;
 import com.sodeca.gestionimmo.dto.MouvementStockDTO;
 import com.sodeca.gestionimmo.dto.PieceDetacheeDTO;
@@ -15,14 +13,11 @@ import com.sodeca.gestionimmo.mapper.PieceDetacheeMapper;
 import com.sodeca.gestionimmo.repository.DemandePieceRepository;
 import com.sodeca.gestionimmo.repository.MouvementStockRepository;
 import com.sodeca.gestionimmo.repository.PieceDetacheeRepository;
-import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,18 +28,24 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
     private final MouvementStockRepository mouvementRepository;
     private final MouvementStockMapper mouvementMapper;
     private final PieceDetacheeMapper pieceMapper;
-
     private final DemandePieceRepository demandeRepository;
+    private final PieceImportService pieceImportService;
+    private final ApprovisionnementImportService approImportService;
 
     public PieceDetacheeServiceImpl(PieceDetacheeRepository pieceRepository,
                                     MouvementStockRepository mouvementRepository,
                                     MouvementStockMapper mouvementMapper,
-                                    PieceDetacheeMapper pieceMapper, DemandePieceRepository demandeRepository) {
+                                    PieceDetacheeMapper pieceMapper,
+                                    DemandePieceRepository demandeRepository,
+                                    PieceImportService pieceImportService,
+                                    ApprovisionnementImportService approImportService) {
         this.pieceRepository = pieceRepository;
         this.mouvementRepository = mouvementRepository;
         this.mouvementMapper = mouvementMapper;
         this.pieceMapper = pieceMapper;
         this.demandeRepository = demandeRepository;
+        this.pieceImportService = pieceImportService;
+        this.approImportService = approImportService;
     }
 
     @Override
@@ -87,6 +88,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
                 .map(pieceMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
     @Override
     public List<MouvementStockDTO> getMouvementsByPiece(Long pieceId) {
         PieceDetachee piece = pieceRepository.findById(pieceId)
@@ -94,78 +96,40 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
 
         return mouvementRepository.findByPiece(piece).stream()
                 .map(mouvementMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<PieceDetacheeDTO> importPiecesFromFile(MultipartFile file) throws IOException {
-        String fileName = file.getOriginalFilename().toLowerCase();
+        return pieceImportService.importPieces(file);
+    }
 
-        if (isExcelFile(fileName)) {
-            return processExcelFile(file);
-        } else if (isCsvFile(fileName)) {
-            return processCsvFile(file);
-        } else {
-            throw new RuntimeException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.");
+    @Override
+    public List<MouvementStockDTO> importApprovisionnements(MultipartFile file) throws IOException {
+        return approImportService.importApprovisionnements(file);
+    }
+
+    @Override
+    public MouvementStockDTO approvisionnement(Long pieceId, int quantite, String commentaire) {
+        if (quantite <= 0) {
+            throw new IllegalArgumentException("La quantité doit être supérieure à 0.");
         }
-    }
 
-    private boolean isExcelFile(String fileName) {
-        return fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
-    }
+        PieceDetachee piece = pieceRepository.findById(pieceId)
+                .orElseThrow(() -> new RuntimeException("Pièce introuvable avec l'ID : " + pieceId));
 
-    private boolean isCsvFile(String fileName) {
-        return fileName.endsWith(".csv");
-    }
+        piece.setStockDisponible(piece.getStockDisponible() + quantite);
+        pieceRepository.save(piece);
 
-    private List<PieceDetacheeDTO> processExcelFile(MultipartFile file) throws IOException {
-        List<PieceDetacheeDTO> pieces = new ArrayList<>();
-        Workbook workbook = WorkbookFactory.create(file.getInputStream());
-        Sheet sheet = workbook.getSheetAt(0);
+        MouvementStock mouvement = new MouvementStock();
+        mouvement.setPiece(piece);
+        mouvement.setQuantite(quantite);
+        mouvement.setTypeMouvement(TypeMouvement.ENTREE);
+        mouvement.setCommentaire(commentaire != null ? commentaire : "Approvisionnement");
+        mouvement.setDateMouvement(LocalDateTime.now());
 
-        for (Row row : sheet) {
-            if (row.getRowNum() == 0) continue; // Ignorer la ligne d'en-tête
-            try {
-                PieceDetacheeDTO pieceDTO = mapExcelRowToPieceDTO(row);
-                PieceDetachee pieceEntity = pieceMapper.toEntity(pieceDTO);
-                PieceDetachee savedEntity = pieceRepository.save(pieceEntity);
-                pieces.add(pieceMapper.toDTO(savedEntity));
-            } catch (Exception e) {
-                System.err.println("Erreur lors de l'importation de la ligne " + row.getRowNum() + ": " + e.getMessage());
-            }
-        }
-        workbook.close();
-        return pieces;
-    }
-
-    private PieceDetacheeDTO mapExcelRowToPieceDTO(Row row) {
-        PieceDetacheeDTO dto = new PieceDetacheeDTO();
-        dto.setReference(getCellValue(row.getCell(0)));
-        dto.setNom(getCellValue(row.getCell(1)));
-        dto.setStockDisponible(Integer.parseInt(getCellValue(row.getCell(2))));
-        dto.setStockMinimum(Integer.parseInt(getCellValue(row.getCell(3))));
-        dto.setDescription(getCellValue(row.getCell(4)));
-        return dto;
-    }
-
-    private List<PieceDetacheeDTO> processCsvFile(MultipartFile file) throws IOException {
-        List<PieceDetacheeDTO> pieces = new ArrayList<>();
-        try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
-            String[] values;
-            boolean isHeader = true;
-
-            while ((values = csvReader.readNext()) != null) {
-                if (isHeader) {
-                    isHeader = false; // Ignorer la ligne d'en-tête
-                    continue;
-                }
-                PieceDetacheeDTO piece = mapCsvRowToPieceDTO(values);
-                pieces.add(piece);
-            }
-        } catch (CsvValidationException e) {
-            throw new RuntimeException("Erreur de validation dans le fichier CSV.", e);
-        }
-        return pieces;
+        MouvementStock savedMouvement = mouvementRepository.save(mouvement);
+        return mouvementMapper.toDTO(savedMouvement);
     }
 
     @Override
@@ -182,11 +146,9 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
             throw new RuntimeException("Stock insuffisant pour valider la demande.");
         }
 
-        // Mise à jour du stock
         piece.setStockDisponible(piece.getStockDisponible() - demande.getQuantiteDemandee());
         pieceRepository.save(piece);
 
-        // Enregistrement du mouvement
         MouvementStock mouvement = new MouvementStock();
         mouvement.setPiece(piece);
         mouvement.setQuantite(demande.getQuantiteDemandee());
@@ -195,12 +157,12 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
         mouvement.setDateMouvement(LocalDateTime.now());
         mouvementRepository.save(mouvement);
 
-        // Mise à jour de l'état de la demande
         demande.setStatut(StatutDemande.APPROUVEE);
         demandeRepository.save(demande);
 
         return mouvementMapper.toDTO(mouvement);
     }
+
     @Override
     public List<InventaireDTO> getInventaire() {
         return pieceRepository.findAll().stream()
@@ -213,28 +175,5 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
                         piece.getStockDisponible() < piece.getStockMinimum()
                 ))
                 .toList();
-    }
-    private PieceDetacheeDTO mapCsvRowToPieceDTO(String[] values) {
-        PieceDetacheeDTO dto = new PieceDetacheeDTO();
-        dto.setReference(values[0]);
-        dto.setNom(values[1]);
-        dto.setStockDisponible(Integer.parseInt(values[2]));
-        dto.setStockMinimum(Integer.parseInt(values[3]));
-        dto.setDescription(values[4]);
-        return dto;
-    }
-
-    private String getCellValue(Cell cell) {
-        if (cell == null) return "";
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                return String.valueOf((int) cell.getNumericCellValue());
-            case BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            default:
-                return "";
-        }
     }
 }

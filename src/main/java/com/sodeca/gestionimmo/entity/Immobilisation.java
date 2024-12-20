@@ -1,9 +1,6 @@
 package com.sodeca.gestionimmo.entity;
 
-import com.sodeca.gestionimmo.enums.EtatImmobilisation;
-import com.sodeca.gestionimmo.enums.StatutCession;
-import com.sodeca.gestionimmo.enums.StatutAffectation;
-import com.sodeca.gestionimmo.enums.TypeImmobilisation;
+import com.sodeca.gestionimmo.enums.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -25,18 +22,18 @@ import java.time.LocalDateTime;
 @Inheritance(strategy = InheritanceType.JOINED) // Permet de créer une table par classe fille
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 public class Immobilisation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true) // Unicité du code d'immobilisation
+
+    @Column(nullable = false, unique = true)
     private String codeImmo; // Code unique pour l'immobilisation
 
     @Column(nullable = false)
     private String designation;
 
     @ManyToOne
-    @JoinColumn(name = "categorie_id", nullable = false) // Association à la catégorie
+    @JoinColumn(name = "categorie_id", nullable = false)
     private Categorie categorie;
 
     @Column(nullable = false)
@@ -54,33 +51,38 @@ public class Immobilisation {
     @Column
     private LocalDate dateMiseEnService;
 
-    // Champs spécifiques pour la gestion des cessions et rébus
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatutCession statutCession = StatutCession.DISPONIBLE; // Statut par défaut
 
     @Column
-    private LocalDate dateCession; // Date de cession ou de rebut
+    private LocalDate dateCession;
 
     @Column
     @Positive
-    private Double valeurCession; // Valeur à la cession ou valeur résiduelle en cas de rebut
+    private Double valeurCession;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatutAffectation statut = StatutAffectation.DISPONIBLE; // Par défaut DISPONIBLE
+    private StatutAffectation statut = StatutAffectation.DISPONIBLE;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EtatImmobilisation etatImmo = EtatImmobilisation.EN_SERVICE; // Statut par défaut
+    private EtatImmobilisation etatImmo =EtatImmobilisation.EN_SERVICE;
+
     @CreationTimestamp
     private LocalDateTime createdDate;
 
+    @Column(nullable = false)
+    private TypeAmortissement typeAmortissement;
+
     @UpdateTimestamp
     private LocalDateTime lastModifiedDate;
-    // Champ "type" basé sur la colonne discriminante
+
+    @Setter
     @Transient
     private TypeImmobilisation type;
 
-    // Getter pour "type"
     public TypeImmobilisation getType() {
         if (this.getClass().isAnnotationPresent(DiscriminatorValue.class)) {
             String discriminatorValue = this.getClass().getAnnotation(DiscriminatorValue.class).value();
@@ -88,10 +90,4 @@ public class Immobilisation {
         }
         return null;
     }
-
-    // Setter pour "type"
-    public void setType(TypeImmobilisation type) {
-        this.type = type;
-    }
-
 }

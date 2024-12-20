@@ -1,5 +1,6 @@
 package com.sodeca.gestionimmo.controller;
 
+import com.sodeca.gestionimmo.dto.AmortissementDTO;
 import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 import com.sodeca.gestionimmo.services.ImmobilisationService;
@@ -8,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -109,7 +112,7 @@ public class ImmobilisationController {
     // Rechercher une immobilisation via QR Code
     @PostMapping("/qrcode")
     public ResponseEntity<ImmobilisationDTO> getImmobilisationByQRCode(@RequestBody String qrCodeData) {
-        ImmobilisationDTO immobilisationDTO = immobilisationService.getImmobilisationByQRCode(qrCodeData);
+        ImmobilisationDTO immobilisationDTO = immobilisationService.getImmobilisationByQRCode(qrCodeData.trim());
         return ResponseEntity.ok(immobilisationDTO);
     }
 
@@ -125,4 +128,39 @@ public class ImmobilisationController {
         immobilisationService.updateEtat(id, etat);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * Importer un fichier Excel ou CSV pour créer des immobilisations.
+     *
+     * @param file Le fichier à importer.
+     * @return Liste des immobilisations créées.
+     */
+
+
+
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            // Vérification si le fichier est vide
+            if (file.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Le fichier est vide. Veuillez fournir un fichier valide.");
+            }
+
+            // Appel au service pour traiter le fichier
+            List<ImmobilisationDTO> importedImmobilisations = immobilisationService.importImmobilisationsFromFile(file);
+
+            // Retourner la liste des immobilisations importées
+            return ResponseEntity.ok(importedImmobilisations);
+        } catch (RuntimeException e) {
+            // Gérer les erreurs spécifiques de runtime
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            // Gérer les autres erreurs
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Une erreur est survenue lors de l'importation : " + e.getMessage());
+        }
+    }
+
+
 }

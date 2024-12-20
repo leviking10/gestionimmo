@@ -52,6 +52,13 @@ public class InterventionServiceImpl implements InterventionService {
         Intervention savedIntervention = interventionRepository.save(intervention);
         return mapper.toDTO(savedIntervention);
     }
+    @Override
+    public List<InterventionDTO> getAllInterventions() {
+        return interventionRepository.findAll()
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
 
     @Override
     public InterventionDTO updateIntervention(Long id, InterventionDTO dto) {

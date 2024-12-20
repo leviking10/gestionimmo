@@ -122,6 +122,7 @@ public interface ImmobilisationMapper {
         entity.setDateMiseEnService(dto.getDateMiseEnService());
         entity.setStatut(dto.getStatutAffectation());
         entity.setEtatImmo(dto.getEtatImmobilisation());
+        entity.setTypeAmortissement(dto.getTypeAmortissement());
         entity.setCreatedDate(null); // Si nécessaire, laissez Hibernate gérer
         entity.setLastModifiedDate(null);
 

@@ -1,6 +1,7 @@
 package com.sodeca.gestionimmo.controller;
 
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
+import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
 import com.sodeca.gestionimmo.services.AmortissementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -84,4 +85,30 @@ public class AmortissementController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
+    /**
+     * Récupérer la situation des amortissements à une date donnée pour une immobilisation.
+     *
+     * @param immobilisationId L'ID de l'immobilisation.
+     * @param date             La date jusqu'à laquelle récupérer les amortissements.
+     * @return Liste des AmortissementDTO.
+     */
+    /**
+     * Récupérer la situation des amortissements à une date donnée avec le cumul des montants amortis.
+     *
+     * @param immobilisationId L'ID de l'immobilisation.
+     * @param date             La date jusqu'à laquelle récupérer les amortissements.
+     * @return SituationAmortissementDTO contenant la liste des amortissements et le cumul.
+     */
+    @GetMapping("/immobilisation/{immobilisationId}/situation-cumul")
+    public ResponseEntity<SituationAmortissementDTO> getSituationAmortissementsAvecCumul(
+            @PathVariable Long immobilisationId,
+            @RequestParam String date) {
+        try {
+            SituationAmortissementDTO situation = amortissementService.getSituationAmortissementsAvecCumul(immobilisationId, date);
+            return ResponseEntity.ok(situation);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
 }

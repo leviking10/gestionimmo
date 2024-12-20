@@ -2,37 +2,45 @@ package com.sodeca.gestionimmo.entity;
 
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
-
 @Entity
-@Table(name = "ammortissements")
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "amortissements")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Amortissement {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_immobilisation", nullable = false)
     private Immobilisation immobilisation;
-    private String methode; // Méthode d'amortissement (ex. Linéaire)
-    @Column
-    private double montantAmorti; // Montant pour cette période
-    @Column
-    private LocalDate dateDebutExercice; // Nouvelle propriété pour la gestion du prorata
-    @Column
-    private LocalDate dateCalcul; // Date du calcul
+
     @Column(nullable = false)
-    private int dureeRestante; // Durée restante en années ou mois
+    private String methode; // Méthode d'amortissement : "Linéaire" ou "Dégressif"
+
+    @Column(nullable = false)
+    private double montantAmorti; // Montant amorti pour la période
+
     @Column
-    private double valeurNette; // Valeur nette de l'immobilisation
-    @Enumerated(EnumType.STRING) // Spécifier le type d'énumération
-    private StatutAmmortissement statut; // Statut de l'amortissement (ex. En cours, ammorti, annulé)
+    private Double coefficientDegressif; // Coefficient spécifique pour le mode dégressif (SYSCOA)
+
+    @Column(nullable = false)
+    private LocalDate dateDebutExercice; // Début de l'exercice comptable (gestion au prorata)
+
+    @Column(nullable = false)
+    private LocalDate dateCalcul; // Date exacte du calcul d'amortissement
+
+    @Column(nullable = false)
+    private double valeurNette; // Valeur nette après amortissement
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatutAmmortissement statut; // Ex: EN_COURS, AMMORTI, ANNULE
 }

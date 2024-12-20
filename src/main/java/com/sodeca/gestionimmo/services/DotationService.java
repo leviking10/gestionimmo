@@ -1,10 +1,18 @@
-package com.sodeca.gestionimmo.services;
+    package com.sodeca.gestionimmo.services;
 
-import com.sodeca.gestionimmo.dto.DotationDTO;
-import java.util.List;
+    import com.sodeca.gestionimmo.dto.DotationDTO;
+    import com.sodeca.gestionimmo.entity.Personnel;
+    import com.sodeca.gestionimmo.entity.PieceDetachee;
 
-public interface DotationService {
-    DotationDTO createDotation(DotationDTO dto);
-    List<DotationDTO> getDotationsByTechnicien(Long technicienId);
-    List<DotationDTO> getDotationsByPiece(Long pieceId);
-}
+    import java.time.LocalDate;
+    import java.util.List;
+
+    public interface DotationService {
+        DotationDTO createDotation(DotationDTO dto);
+        List<DotationDTO> getDotationsByTechnicien(Long technicienId);
+        List<DotationDTO> getDotationsByPiece(Long pieceId);
+
+        List<DotationDTO> getAllDotations();
+
+        List<DotationDTO> getDotationsByDateRange(LocalDate startDate, LocalDate endDate);
+    }

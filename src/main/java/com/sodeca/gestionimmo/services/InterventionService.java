@@ -14,6 +14,7 @@ public interface InterventionService {
     List<InterventionDTO> getInterventionsByTechnicien(Long technicienId);
     InterventionDTO commencerIntervention(Long id);
     InterventionDTO terminerIntervention(Long id, String rapport);
+    List<InterventionDTO> getAllInterventions();
 
     InterventionDTO updateStatutIntervention(Long id, StatutIntervention statut);
 

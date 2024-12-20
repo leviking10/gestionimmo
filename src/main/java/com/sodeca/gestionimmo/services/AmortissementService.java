@@ -1,8 +1,10 @@
 package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
+import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AmortissementService {
 
@@ -14,4 +16,5 @@ public interface AmortissementService {
 
     void cancelAmortissement(int id);
 
+    SituationAmortissementDTO getSituationAmortissementsAvecCumul(Long immobilisationId, String date);
 }

@@ -38,6 +38,15 @@ public class PieceDetacheeController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/approvisionnement")
+    public ResponseEntity<MouvementStockDTO> approvisionnerPiece(
+            @PathVariable Long id,
+            @RequestParam int quantite,
+            @RequestParam(required = false) String commentaire) {
+        MouvementStockDTO mouvementDTO = service.approvisionnement(id, quantite, commentaire);
+        return ResponseEntity.status(HttpStatus.CREATED).body(mouvementDTO);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PieceDetacheeDTO> getPieceById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getPieceById(id));
@@ -52,12 +61,13 @@ public class PieceDetacheeController {
     public ResponseEntity<List<InventaireDTO>> getInventaire() {
         return ResponseEntity.ok(service.getInventaire());
     }
+
     @GetMapping("/{id}/mouvements")
     public ResponseEntity<List<MouvementStockDTO>> getMouvementsByPiece(@PathVariable Long id) {
         return ResponseEntity.ok(service.getMouvementsByPiece(id));
     }
 
-    @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    @PostMapping(value = "/upload-pieces", consumes = "multipart/form-data")
     public ResponseEntity<List<PieceDetacheeDTO>> importPieces(@RequestParam("file") MultipartFile file) {
         try {
             List<PieceDetacheeDTO> importedPieces = service.importPiecesFromFile(file);
@@ -67,4 +77,13 @@ public class PieceDetacheeController {
         }
     }
 
+    @PostMapping(value = "/upload-approvisionnements", consumes = "multipart/form-data")
+    public ResponseEntity<List<MouvementStockDTO>> importApprovisionnements(@RequestParam("file") MultipartFile file) {
+        try {
+            List<MouvementStockDTO> importedAppro = service.importApprovisionnements(file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(importedAppro);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
 }

@@ -11,6 +11,7 @@ import com.sodeca.gestionimmo.repository.PersonnelRepository;
 import com.sodeca.gestionimmo.repository.SignalementRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class SignalementServiceImpl implements SignalementService {
@@ -50,9 +51,41 @@ public class SignalementServiceImpl implements SignalementService {
         Signalement signalement = signalementMapper.toEntity(signalementDTO);
         signalement.setPersonnel(personnel);
         signalement.setImmobilisation(immobilisation);
-
+        signalement.setDateSignalement(LocalDateTime.now());
+        signalement.setDescription(signalementDTO.getDescription());
         Signalement savedSignalement = signalementRepository.save(signalement);
         return signalementMapper.toDTO(savedSignalement);
+    }
+    @Override
+    public List<SignalementDTO> getAllSignalements() {
+        return signalementRepository.findAll()
+                .stream()
+                .map(signalementMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<SignalementDTO> getSignalementsByDateRange(String startDate, String endDate) {
+        LocalDateTime start = LocalDateTime.parse(startDate);
+        LocalDateTime end = LocalDateTime.parse(endDate);
+        return signalementRepository.findByDateSignalementBetween(start, end)
+                .stream()
+                .map(signalementMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public SignalementDTO markSignalementAsTraite(Long id) {
+        Signalement signalement = signalementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Signalement introuvable avec l'ID : " + id));
+        signalement.setDescription(signalement.getDescription() + " - Traité");
+        signalementRepository.save(signalement);
+        return signalementMapper.toDTO(signalement);
+    }
+
+    @Override
+    public Long getSignalementCount() {
+        return signalementRepository.count();
     }
 
     @Override

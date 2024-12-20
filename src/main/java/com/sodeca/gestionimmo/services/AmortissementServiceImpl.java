@@ -1,16 +1,20 @@
 package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
+import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
 import com.sodeca.gestionimmo.entity.Amortissement;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
-import com.sodeca.gestionimmo.mapper.ImmobilisationMapper;
+import com.sodeca.gestionimmo.enums.TypeAmortissement;
 import com.sodeca.gestionimmo.repository.AmortissementRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @Service
 public class AmortissementServiceImpl implements AmortissementService {
 
@@ -18,19 +22,16 @@ public class AmortissementServiceImpl implements AmortissementService {
     private final ImmobilisationRepository immobilisationRepository;
     private final AmortissementLineaireStrategy lineaireStrategy;
     private final AmortissementDegressifStrategy degressifStrategy;
-    private final ImmobilisationMapper mapper;
 
     public AmortissementServiceImpl(
             AmortissementRepository amortissementRepository,
             ImmobilisationRepository immobilisationRepository,
             AmortissementLineaireStrategy lineaireStrategy,
-            AmortissementDegressifStrategy degressifStrategy,
-            ImmobilisationMapper mapper) {
+            AmortissementDegressifStrategy degressifStrategy) {
         this.amortissementRepository = amortissementRepository;
         this.immobilisationRepository = immobilisationRepository;
         this.lineaireStrategy = lineaireStrategy;
         this.degressifStrategy = degressifStrategy;
-        this.mapper = mapper;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class AmortissementServiceImpl implements AmortissementService {
         return amortissementRepository.findByImmobilisationId(immobilisationId)
                 .stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -54,22 +55,19 @@ public class AmortissementServiceImpl implements AmortissementService {
 
         List<Amortissement> amortissements;
 
-        switch (methode.toLowerCase()) {
-            case "linéaire":
-                amortissements = lineaireStrategy.calculerAmortissements(immobilisation, dernierAmortissement);
-                break;
-            case "dégressif":
-                amortissements = degressifStrategy.calculerAmortissements(immobilisation, dernierAmortissement);
-                break;
-            default:
-                throw new RuntimeException("Méthode d'amortissement non reconnue : " + methode);
+        if (TypeAmortissement.LINEAIRE.getLabel().equalsIgnoreCase(methode)) {
+            amortissements = lineaireStrategy.calculerAmortissements(immobilisation, dernierAmortissement);
+        } else if (TypeAmortissement.DEGRESSIF.getLabel().equalsIgnoreCase(methode)) {
+            amortissements = degressifStrategy.calculerAmortissements(immobilisation, dernierAmortissement);
+        } else {
+            throw new RuntimeException("Méthode d'amortissement non reconnue : " + methode);
         }
 
         amortissementRepository.saveAll(amortissements);
 
         return amortissements.stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -93,14 +91,31 @@ public class AmortissementServiceImpl implements AmortissementService {
         amortissementRepository.save(amortissement);
     }
 
-    // Méthode pour récupérer le dernier amortissement
+    @Override
+    public SituationAmortissementDTO getSituationAmortissementsAvecCumul(Long immobilisationId, String date) {
+        LocalDate filterDate = LocalDate.parse(date);
+        List<Amortissement> amortissements = amortissementRepository.findByImmobilisationId(immobilisationId)
+                .stream()
+                .filter(amortissement -> !amortissement.getDateCalcul().isAfter(filterDate))
+                .toList();
+
+        double cumulAmortissements = amortissements.stream()
+                .mapToDouble(Amortissement::getMontantAmorti)
+                .sum();
+
+        List<AmortissementDTO> amortissementDTOs = amortissements.stream()
+                .map(this::mapToDTO)
+                .toList();
+
+        return new SituationAmortissementDTO(amortissementDTOs, cumulAmortissements);
+    }
+
     private Optional<Amortissement> getDernierAmortissement(Long immobilisationId) {
         return amortissementRepository.findByImmobilisationId(immobilisationId)
                 .stream()
                 .max((a1, a2) -> a1.getDateCalcul().compareTo(a2.getDateCalcul()));
     }
 
-    // Méthode pour convertir Amortissement en DTO
     private AmortissementDTO mapToDTO(Amortissement amortissement) {
         return new AmortissementDTO(
                 amortissement.getId(),

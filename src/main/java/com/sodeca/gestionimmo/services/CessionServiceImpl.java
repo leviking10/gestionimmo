@@ -8,6 +8,7 @@ import com.sodeca.gestionimmo.repository.CessionRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -91,7 +92,42 @@ public class CessionServiceImpl implements CessionService {
                 .map(this::mapToDTO)
                 .toList();
     }
+    @Override
+    public List<CessionDTO> getAllCessions() {
+        return cessionRepository.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
 
+
+
+    @Override
+    public List<CessionDTO> getCessionsByStatut(StatutCession statut) {
+        return cessionRepository.findByStatutCession(statut)
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+
+    @Override
+    public CessionDTO getCessionById(Long cessionId) {
+        return mapToDTO(getCession(cessionId));
+    }
+
+    @Override
+    public Long getCountByStatut(StatutCession statut) {
+        return cessionRepository.countByStatutCession(statut);
+    }
+
+    @Override
+    public List<CessionDTO> getCessionsByDateRange(LocalDate startDate, LocalDate endDate) {
+        return cessionRepository.findByDateCessionBetween(startDate, endDate)
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
     @Override
     public void annulerCession(Long immobilisationId) {
         Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
@@ -106,6 +142,14 @@ public class CessionServiceImpl implements CessionService {
         immobilisation.setValeurCession(null);
         immobilisationRepository.save(immobilisation);
     }
+
+
+    private Cession getCession(Long id) {
+        return cessionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cession introuvable avec ID : " + id));
+    }
+
+
 
     private CessionDTO mapToDTO(Cession cession) {
         return new CessionDTO(

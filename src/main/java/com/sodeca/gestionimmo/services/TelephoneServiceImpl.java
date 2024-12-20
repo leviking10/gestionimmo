@@ -33,7 +33,6 @@ public class TelephoneServiceImpl implements TelephoneService {
         return telephoneRepository.findById(id)
                 .map(mapper::toTelephoneDTO);
     }
-
     @Override
     public TelephoneDTO updateTelephone(Long id, TelephoneDTO dto) {
         Telephone telephone = telephoneRepository.findById(id)
@@ -44,6 +43,7 @@ public class TelephoneServiceImpl implements TelephoneService {
         telephone.setModele(dto.getModele());
         telephone.setImei(dto.getImei());
         telephone.setNumeroSerie(dto.getNumeroSerie());
+        telephone.setEtatImmo(dto.getEtatImmobilisation());
         Telephone updated = telephoneRepository.save(telephone);
         return mapper.toTelephoneDTO(updated);
     }

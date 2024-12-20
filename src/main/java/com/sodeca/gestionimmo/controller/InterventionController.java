@@ -68,4 +68,10 @@ public class InterventionController {
         List<InterventionDTO> interventions = interventionService.getInterventionsByTechnicien(technicienId);
         return ResponseEntity.ok(interventions);
     }
+    @GetMapping
+    public ResponseEntity<List<InterventionDTO>> getAllInterventions() {
+        List<InterventionDTO> interventions = interventionService.getAllInterventions();
+        return ResponseEntity.ok(interventions);
+    }
+
 }

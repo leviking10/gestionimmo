@@ -20,7 +20,6 @@ public class Vehicule extends Immobilisation {
     private String immatriculation;
     @Column
     private String marque;
-
     @Column
     private String modele;
     @Column

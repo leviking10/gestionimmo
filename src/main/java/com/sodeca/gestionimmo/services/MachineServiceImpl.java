@@ -43,13 +43,6 @@ public class MachineServiceImpl implements MachineService {
         machine.setPuissance(dto.getPuissance());
         machine.setFabricant(dto.getFabricant());
         machine.setNumeroSerie(dto.getNumeroSerie());
-
-        // Mise à jour des champs communs hérités
-        machine.setDesignation(dto.getDesignation());
-        machine.setDateAcquisition(dto.getDateAcquisition());
-        machine.setValeurAcquisition(dto.getValeurAcquisition());
-        machine.setLocalisation(dto.getLocalisation());
-
         // Sauvegarde et retour
         Machine updated = machineRepository.save(machine);
         return mapper.toMachineDTO(updated);

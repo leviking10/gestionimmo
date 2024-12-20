@@ -13,5 +13,4 @@ public class VehiculeDTO extends ImmobilisationDTO {
     private String modele;
     private String kilometrage;
     private LocalDate dateDerniereRevision;
-    private LocalDate dateMiseEnService;
 }

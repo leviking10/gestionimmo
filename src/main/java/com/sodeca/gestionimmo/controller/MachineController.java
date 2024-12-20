@@ -38,7 +38,7 @@ public class MachineController {
     /**
      * Mettre à jour les champs techniques d'une machine.
      */
-    @PutMapping("/{id}/details")
+    @PutMapping("/{id}")
     public ResponseEntity<MachineDTO> updateMachine(@PathVariable Long id, @RequestBody MachineDTO dto) {
         return ResponseEntity.ok(machineService.updateMachine(id, dto));
     }

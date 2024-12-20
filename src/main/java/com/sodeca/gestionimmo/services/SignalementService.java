@@ -8,6 +8,14 @@ public interface SignalementService {
 
     SignalementDTO createSignalement(SignalementDTO signalementDTO);
 
+    List<SignalementDTO> getAllSignalements();
+
+    List<SignalementDTO> getSignalementsByDateRange(String startDate, String endDate);
+
+    SignalementDTO markSignalementAsTraite(Long id);
+
+    Long getSignalementCount();
+
     SignalementDTO updateSignalement(Long signalementId, SignalementDTO signalementDTO);
 
     void deleteSignalement(Long signalementId);

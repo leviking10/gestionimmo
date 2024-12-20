@@ -104,4 +104,32 @@ public class SignalementController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
+    // 1. Récupérer tous les signalements
+    @GetMapping
+    public ResponseEntity<List<SignalementDTO>> getAllSignalements() {
+        return ResponseEntity.ok(signalementService.getAllSignalements());
+    }
+
+    // 2. Récupérer les signalements entre deux dates
+    @GetMapping("/filtre")
+    public ResponseEntity<List<SignalementDTO>> getSignalementsByDateRange(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        return ResponseEntity.ok(signalementService.getSignalementsByDateRange(startDate, endDate));
+    }
+
+    // 3. Marquer un signalement comme traité
+    @PutMapping("/{id}/traite")
+    public ResponseEntity<SignalementDTO> markSignalementAsTraite(@PathVariable Long id) {
+        return ResponseEntity.ok(signalementService.markSignalementAsTraite(id));
+    }
+
+    // 4. Obtenir le nombre total de signalements
+    @GetMapping("/count")
+    public ResponseEntity<Long> getSignalementCount() {
+        return ResponseEntity.ok(signalementService.getSignalementCount());
+    }
 }
+
