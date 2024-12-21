@@ -13,11 +13,15 @@ public interface ImmobilisationMapper {
     @Mapping(source = "categorie.categorie", target = "categorieDesignation")
     @Mapping(expression = "java(immobilisation.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     @Mapping(source = "type", target = "type")
+    @Mapping(source = "etatImmo", target = "etatImmobilisation")
+    @Mapping(source = "statut", target = "statutAffectation")
     ImmobilisationDTO toDTO(Immobilisation immobilisation);
 
     // Conversion générique pour ImmobilisationDTO -> Immobilisation
     @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     @Mapping(source = "type", target = "type")
+    @Mapping(source = "etatImmobilisation", target = "etatImmo")
+    @Mapping(source = "statutAffectation", target = "statut")
     Immobilisation toEntity(ImmobilisationDTO dto);
 
     // Conversion spécifique pour Ordinateur

@@ -46,11 +46,15 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
 
     @Override
     public List<ImmobilisationDTO> getAllImmobilisations() {
-        return immobilisationRepository.findAll()
-                .stream()
-                .map(mapper::toPolymorphicDTO)
+        List<Immobilisation> immobilisations = immobilisationRepository.findAll();
+
+        immobilisations.forEach(immo -> logger.info("Immobilisation récupérée : {}", immo));
+
+        return immobilisations.stream()
+                .map(mapper::toDTO)
                 .toList();
     }
+
 
     @Override
     public Optional<ImmobilisationDTO> getImmobilisationById(Long id) {
@@ -127,6 +131,14 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     @Override
     public ImmobilisationDTO createImmobilisation(ImmobilisationDTO dto) {
         // Récupérer la catégorie par désignation
+        // Ajout des valeurs par défaut pour les champs obligatoires
+        if (dto.getStatutAffectation() == null) {
+            dto.setStatutAffectation(StatutAffectation.DISPONIBLE);
+        }
+        if (dto.getEtatImmobilisation() == null) {
+            dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
+        }
+
         Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
                 .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
 

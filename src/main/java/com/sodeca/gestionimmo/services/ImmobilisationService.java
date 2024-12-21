@@ -23,12 +23,11 @@ public interface ImmobilisationService {
     // Méthodes pour les cessions
 
     ImmobilisationDTO getImmobilisationByCode(String codeImmo);
-
-    List<ImmobilisationDTO> getImmobilisationsCedees();
-
     byte[] getQRCodeAsImage(Long id);
 
     byte[] downloadQRCode(Long id);
+
+    List<ImmobilisationDTO> getImmobilisationsCedees();
 
     ImmobilisationDTO getImmobilisationByQRCode(String qrCodeData);
     void updateEtat(Long immobilisationId, EtatImmobilisation nouvelEtat);

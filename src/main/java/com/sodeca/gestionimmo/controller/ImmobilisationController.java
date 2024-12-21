@@ -3,7 +3,9 @@ package com.sodeca.gestionimmo.controller;
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
 import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.enums.EtatImmobilisation;
+import com.sodeca.gestionimmo.services.AmortissementService;
 import com.sodeca.gestionimmo.services.ImmobilisationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,7 +43,14 @@ public class ImmobilisationController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @Autowired
+    private AmortissementService amortissementService;
 
+    @GetMapping("/{id}/amortissements")
+    public ResponseEntity<List<AmortissementDTO>> getAmortissementsByImmobilisation(@PathVariable Long id) {
+        List<AmortissementDTO> amortissements = amortissementService.getAmortissementsByImmobilisation(id);
+        return ResponseEntity.ok(amortissements);
+    }
     // Récupérer une immobilisation par son codeImmo
     @GetMapping("/code/{codeImmo}")
     public ResponseEntity<ImmobilisationDTO> getImmobilisationByCode(@PathVariable String codeImmo) {

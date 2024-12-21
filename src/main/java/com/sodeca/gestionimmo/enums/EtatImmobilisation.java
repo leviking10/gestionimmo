@@ -1,26 +1,26 @@
 package com.sodeca.gestionimmo.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 
 @Getter
 public enum EtatImmobilisation {
-    EN_SERVICE("En service"),
-    EN_MAINTENANCE("En maintenance"),
-    HORS_SERVICE ("Hors service"),
-    PLANIFIE ("Planifié"),
-    SIGNALE ("Signalé");
-    private final String label;
+    EN_SERVICE,
+    EN_MAINTENANCE,
+    HORS_SERVICE ,
+    PLANIFIE ,
+    SIGNALE;
 
-    EtatImmobilisation(String label) {
-        this.label = label;
-    }
-
-    public static EtatImmobilisation fromLabel(String label) {
-        for (EtatImmobilisation etat : values()) {
-            if (etat.getLabel().equalsIgnoreCase(label)) {
-                return etat;
-            }
+    @JsonCreator
+    public static EtatImmobilisation fromLabel(String value) {
+        if (value == null || value.isEmpty()) {
+            return null;
         }
-        throw new IllegalArgumentException("Etat d'immobilisation invalide : " + label);
+        try {
+            return EtatImmobilisation.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Etat d'immobilisation inconnu : " + value);
+        }
+
     }
 }
