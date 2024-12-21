@@ -62,20 +62,6 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
                 .map(mapper::toPolymorphicDTO);
     }
 
-    // Méthode pour générer un code séquentiel au format CODE00001
-    private String generateSequentialCodeImmo() {
-        // Récupérer le dernier code existant dans la base
-        String dernierCode = immobilisationRepository.findTopByOrderByCodeImmoDesc()
-                .map(Immobilisation::getCodeImmo)
-                .orElse("CODE00001"); // Si aucun code n'existe, commencer à CODE00001
-
-        // Extraire la partie numérique et incrémenter
-        int numero = Integer.parseInt(dernierCode.replace("CODE", "")) + 1;
-
-        // Formater le code en CODE00001
-        return String.format("CODE%05d", numero);
-    }
-
     @Override
     public List<ImmobilisationDTO> createImmobilisations(List<ImmobilisationDTO> dtos) {
         List<Immobilisation> immobilisations = dtos.stream().map(dto -> {
@@ -91,16 +77,19 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
             immobilisation.setCategorie(categorie);
 
-            // Générer un code d'immobilisation unique au format CODE00001
-            if (dto.getCodeImmo() == null || dto.getCodeImmo().isEmpty()) {
-                immobilisation.setCodeImmo(generateSequentialCodeImmo());
-            } else {
-                if (immobilisationRepository.findByCodeImmo(dto.getCodeImmo()).isPresent()) {
-                    throw new RuntimeException("Le code d'immobilisation est déjà utilisé : " + dto.getCodeImmo());
-                }
-                immobilisation.setCodeImmo(dto.getCodeImmo());
+            if (dto.getStatutAffectation() == null) {
+                dto.setStatutAffectation(StatutAffectation.DISPONIBLE);
             }
+            if (dto.getEtatImmobilisation() == null) {
+                dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
+            }
+             categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
 
+            // Vérifier si la catégorie est active
+            if (!categorie.isActif()) {
+                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
+            }
             // Générer et assigner un QR Code
             generateAndAssignQRCode(immobilisation);
 
