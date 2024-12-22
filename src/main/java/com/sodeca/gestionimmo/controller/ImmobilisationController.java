@@ -171,5 +171,13 @@ public class ImmobilisationController {
         }
     }
 
+    /** liste des immobilisations cédées
+     *
+     * @return
+     */
+    @GetMapping("/ceded")
+    public List<ImmobilisationDTO> getImmobilisationsCedees() {
+        return immobilisationService.getImmobilisationsCedees();
+    }
 
 }

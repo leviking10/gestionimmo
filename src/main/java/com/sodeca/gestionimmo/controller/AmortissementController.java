@@ -2,6 +2,8 @@ package com.sodeca.gestionimmo.controller;
 
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
 import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
+import com.sodeca.gestionimmo.entity.Immobilisation;
+import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
 import com.sodeca.gestionimmo.services.AmortissementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +16,11 @@ import java.util.List;
 public class AmortissementController {
 
     private final AmortissementService amortissementService;
+    private final ImmobilisationRepository immobilisationRepository;
 
-    public AmortissementController(AmortissementService amortissementService) {
+    public AmortissementController(AmortissementService amortissementService, ImmobilisationRepository immobilisationRepository) {
         this.amortissementService = amortissementService;
+        this.immobilisationRepository = immobilisationRepository;
     }
 
     /**
@@ -36,23 +40,35 @@ public class AmortissementController {
     }
 
     /**
-     * Générer automatiquement des amortissements pour une immobilisation selon une méthode.
+     * Générer automatiquement des amortissements pour une immobilisation.
      *
      * @param immobilisationId L'ID de l'immobilisation.
-     * @param methode          La méthode d'amortissement ("Linéaire" ou "Dégressif").
      * @return Liste des AmortissementDTO générés.
      */
     @PostMapping("/generate/{immobilisationId}")
-    public ResponseEntity<?> generateAmortissements(
-            @PathVariable Long immobilisationId,
-            @RequestParam String methode) {
+    public ResponseEntity<?> generateAmortissements(@PathVariable Long immobilisationId) {
         try {
+            // Récupération de l'immobilisation pour déterminer sa méthode d'amortissement
+            Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
+                    .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
+
+            // Définir la méthode d'amortissement à partir du type d'immobilisation
+            String methode = immobilisation.getTypeAmortissement() != null
+                    ? immobilisation.getTypeAmortissement().getLabel()
+                    : null;
+
+            if (methode == null) {
+                throw new RuntimeException("La méthode d'amortissement n'est pas définie pour cette immobilisation.");
+            }
+
+            // Génération des amortissements
             List<AmortissementDTO> amortissements = amortissementService.generateAmortissementsForImmobilisation(immobilisationId, methode);
             return ResponseEntity.ok(amortissements);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
+
 
     /**
      * Supprimer un amortissement par ID.
@@ -85,13 +101,7 @@ public class AmortissementController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
-    /**
-     * Récupérer la situation des amortissements à une date donnée pour une immobilisation.
-     *
-     * @param immobilisationId L'ID de l'immobilisation.
-     * @param date             La date jusqu'à laquelle récupérer les amortissements.
-     * @return Liste des AmortissementDTO.
-     */
+
     /**
      * Récupérer la situation des amortissements à une date donnée avec le cumul des montants amortis.
      *
@@ -110,5 +120,4 @@ public class AmortissementController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
-
 }

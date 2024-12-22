@@ -21,4 +21,9 @@ public class AmortissementDTO {
     private LocalDate dateCalcul; // Date du calcul
     private double valeurNette; // Valeur nette de l'immobilisation après amortissement
     private StatutAmmortissement statut; // Statut de l'amortissement (ex. "En cours", "ammorti", "annulé")
+    private Double tauxDegressif;
+    private double montantCumule;
+    private Double tauxAnnuel;
+    private Double prorata;
+
 }

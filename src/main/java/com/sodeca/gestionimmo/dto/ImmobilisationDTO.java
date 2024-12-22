@@ -26,7 +26,7 @@ public class ImmobilisationDTO {
     private String categorieDesignation;
     private LocalDate dateAcquisition;
     @Positive(message = "La valeur d'acquisition doit être positive")
-    private double valeurAcquisition;
+    private Double valeurAcquisition;
     private String localisation;
     private String qrCode;
     private LocalDate dateMiseEnService;

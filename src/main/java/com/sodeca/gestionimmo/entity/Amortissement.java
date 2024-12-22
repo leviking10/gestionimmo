@@ -43,4 +43,16 @@ public class Amortissement {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatutAmmortissement statut; // Ex: EN_COURS, AMMORTI, ANNULE
+    @Column(nullable = true)
+    private Double tauxDegressif; // Taux applicable pour l'amortissement dégressif
+
+    @Column(nullable = false)
+    private double montantCumule; // Montant cumulé des amortissements
+
+    @Column(nullable = true)
+    private Double tauxAnnuel; // Taux annuel pour le calcul linéaire ou dégressif
+
+    @Column(nullable = true)
+    private Double prorata; // Prorata pour le premier exercice (nullable si non applicable)
+
 }

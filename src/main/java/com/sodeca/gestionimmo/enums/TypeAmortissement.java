@@ -13,30 +13,32 @@ public enum TypeAmortissement {
     DEGRESSIF("Dégressif");    // Amortissement dégressif
 
     /**
-     * -- GETTER --
-     *  Récupère le libellé associé au type d'amortissement.
-     *
-     * @return le libellé en chaîne de caractères.
+     * Libellé associé au type d'amortissement.
      */
     private final String label;
 
+    /**
+     * Constructeur de l'enum.
+     *
+     * @param label Libellé associé au type d'amortissement.
+     */
     TypeAmortissement(String label) {
         this.label = label;
     }
 
     /**
-     * Méthode utilitaire pour obtenir un TypeAmortissement à partir d'une chaîne.
+     * Méthode utilitaire pour obtenir un TypeAmortissement à partir d'une chaîne (label ou nom de constante).
      *
-     * @param label le libellé à rechercher.
-     * @return le TypeAmortissement correspondant.
-     * @throws IllegalArgumentException si le libellé ne correspond à aucun type.
+     * @param value La valeur à rechercher (label ou nom de constante).
+     * @return Le TypeAmortissement correspondant.
+     * @throws IllegalArgumentException si la valeur ne correspond à aucun type.
      */
-    public static @NotNull(message = "La methode d'amortissement est obligatoire") TypeAmortissement fromLabels(String label) {
+    public static @NotNull(message = "La méthode d'amortissement est obligatoire") TypeAmortissement fromLabelOrName(String value) {
         for (TypeAmortissement type : values()) {
-            if (type.getLabel().equalsIgnoreCase(label)) {
+            if (type.name().equalsIgnoreCase(value) || type.getLabel().equalsIgnoreCase(value)) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Type d'amortissement invalide : " + label);
+        throw new IllegalArgumentException("Type d'amortissement invalide : " + value);
     }
 }

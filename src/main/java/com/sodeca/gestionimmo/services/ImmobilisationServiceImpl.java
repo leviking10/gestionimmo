@@ -168,39 +168,39 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         Immobilisation ancienneImmobilisation = immobilisationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + id));
 
-        // Vérifier si le type a changé
-        if (dto.getType() != null && !dto.getType().equals(ancienneImmobilisation.getType())) {
-            // Supprimer l'ancien enregistrement
-            immobilisationRepository.delete(ancienneImmobilisation);
-
-            // Créer une nouvelle immobilisation avec le nouveau type
-            Immobilisation nouvelleImmobilisation = mapper.toPolymorphicEntity(dto);
-
-            // Associer la même catégorie si elle n'est pas modifiée
-            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
-                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable : " + dto.getCategorieDesignation()));
-            nouvelleImmobilisation.setCategorie(categorie);
-
-            // Conserver l'ID et le code unique pour ne pas casser les relations
-            nouvelleImmobilisation.setId(id);
-            nouvelleImmobilisation.setCodeImmo(ancienneImmobilisation.getCodeImmo());
-
-            // Sauvegarder la nouvelle immobilisation
-            Immobilisation savedImmobilisation = immobilisationRepository.save(nouvelleImmobilisation);
-            return mapper.toPolymorphicDTO(savedImmobilisation);
+        // Mise à jour des champs si non null dans le DTO
+        if (dto.getDesignation() != null) {
+            ancienneImmobilisation.setDesignation(dto.getDesignation());
         }
 
-        // Mise à jour des champs génériques
-        ancienneImmobilisation.setDesignation(dto.getDesignation());
-        ancienneImmobilisation.setDateAcquisition(dto.getDateAcquisition());
-        ancienneImmobilisation.setValeurAcquisition(dto.getValeurAcquisition());
-        ancienneImmobilisation.setLocalisation(dto.getLocalisation());
-        ancienneImmobilisation.setDateMiseEnService(dto.getDateMiseEnService());
-        ancienneImmobilisation.setEtatImmo(dto.getEtatImmobilisation());
-        ancienneImmobilisation.setStatut(dto.getStatutAffectation());
-        ancienneImmobilisation.setTypeAmortissement(dto.getTypeAmortissement());
+        if (dto.getDateAcquisition() != null) {
+            ancienneImmobilisation.setDateAcquisition(dto.getDateAcquisition());
+        }
 
-        // Mise à jour de la catégorie
+        if (dto.getValeurAcquisition() != null) {
+            ancienneImmobilisation.setValeurAcquisition(dto.getValeurAcquisition());
+        }
+
+        if (dto.getLocalisation() != null) {
+            ancienneImmobilisation.setLocalisation(dto.getLocalisation());
+        }
+
+        if (dto.getDateMiseEnService() != null) {
+            ancienneImmobilisation.setDateMiseEnService(dto.getDateMiseEnService());
+        }
+
+        if (dto.getEtatImmobilisation() != null) {
+            ancienneImmobilisation.setEtatImmo(dto.getEtatImmobilisation());
+        }
+
+        if (dto.getStatutAffectation() != null) {
+            ancienneImmobilisation.setStatut(dto.getStatutAffectation());
+        }
+
+        if (dto.getTypeAmortissement() != null) {
+            ancienneImmobilisation.setTypeAmortissement(dto.getTypeAmortissement());
+        }
+
         if (dto.getCategorieDesignation() != null) {
             Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
                     .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
@@ -210,11 +210,12 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             ancienneImmobilisation.setCategorie(categorie);
         }
 
-        // Sauvegarder l'immobilisation mise à jour
+        // Sauvegarder les modifications
         Immobilisation updatedImmobilisation = immobilisationRepository.save(ancienneImmobilisation);
 
         return mapper.toPolymorphicDTO(updatedImmobilisation);
     }
+
 
 
     @Override
