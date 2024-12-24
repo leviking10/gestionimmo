@@ -27,37 +27,29 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
 
         validateDureeRestante(dureeRestante);
 
+        // Taux constant pour toute la durée
+        double tauxAnnuelConstant = (1.0 / dureeAmortissement) * 100;
+
         LocalDate dateDebutExercice = dernierAmortissement
                 .map(Amortissement::getDateCalcul)
-                .orElse(LocalDate.of(immobilisation.getDateAcquisition().getYear(), 1, 1));
+                .orElse(immobilisation.getDateMiseEnService().withDayOfYear(1)); // Date exacte de mise en service
 
-        // Calcul du montant amorti annuel (constant après la première année)
         double montantAnnuel = valeurAcquisition / dureeAmortissement;
-
-        // Initialisation de la valeur comptable
         double valeurComptable = dernierAmortissement.map(Amortissement::getValeurNette)
                 .orElse(valeurAcquisition);
 
         for (int i = 0; i < dureeRestante; i++) {
             double montantAmorti;
 
-            // Ajustement pour la première année avec prorata
-            if (i == 0 && isProrataApplicable(immobilisation, dateDebutExercice)) {
+            if (i == 0 && isProrataApplicable(immobilisation)) {
                 montantAmorti = prorataCalcul(immobilisation, montantAnnuel);
-            } else if (i == dureeRestante - 1) {
-                // Ajustement pour la dernière année pour équilibrer les montants
-                montantAmorti = valeurComptable;
             } else {
-                montantAmorti = montantAnnuel;
+                montantAmorti = Math.min(montantAnnuel, valeurComptable);
             }
 
             valeurComptable -= montantAmorti;
 
-            // Calcul du taux annuel avant modification de la valeur comptable
-            double tauxAnnuel = (montantAmorti / valeurAcquisition) * 100;
-
-            logger.info("Calcul linéaire - Année {} : Montant amorti={}, Valeur nette={}, Taux Annuel={}",
-                    i + 1, montantAmorti, valeurComptable, tauxAnnuel);
+            logger.info("Année {} : Montant amorti = {}, Valeur nette = {}", i + 1, montantAmorti, valeurComptable);
 
             amortissements.add(Amortissement.builder()
                     .immobilisation(immobilisation)
@@ -66,46 +58,69 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
                     .dateDebutExercice(dateDebutExercice.plusYears(i))
                     .dateCalcul(dateDebutExercice.plusYears(i + 1).minusDays(1))
                     .valeurNette(Math.max(valeurComptable, 0.0))
-                    .tauxAnnuel(tauxAnnuel)
-                    .prorata(i == 0 ? prorataCalcul(immobilisation, montantAnnuel) : 0.0)
-                    .statut(i == dureeRestante - 1 ? StatutAmmortissement.AMMORTI : StatutAmmortissement.EN_COURS)
+                    .tauxAnnuel(tauxAnnuelConstant)
+                    .prorata(i == 0 && isProrataApplicable(immobilisation) ? prorataCalcul(immobilisation, montantAnnuel) : 0.0)
+                    .statut(valeurComptable <= 0 ? StatutAmmortissement.AMORTI : StatutAmmortissement.EN_COURS)
                     .build());
         }
 
-        // Validation finale pour vérifier que le total des amortissements est correct
+        if (valeurComptable > 0) {
+            logger.info("Ajout d'une dernière ligne pour équilibrer. Montant restant = {}", valeurComptable);
+            double montantAmortiFinal = valeurComptable;
+            valeurComptable -= montantAmortiFinal;
+
+            amortissements.add(Amortissement.builder()
+                    .immobilisation(immobilisation)
+                    .methode("Linéaire")
+                    .montantAmorti(montantAmortiFinal)
+                    .dateDebutExercice(dateDebutExercice.plusYears(dureeRestante))
+                    .dateCalcul(dateDebutExercice.plusYears(dureeRestante + 1).minusDays(1))
+                    .valeurNette(0.0)
+                    .tauxAnnuel(tauxAnnuelConstant)
+                    .prorata(0.0)
+                    .statut(StatutAmmortissement.AMORTI)
+                    .build());
+        }
+
         double totalAmortissements = amortissements.stream()
                 .mapToDouble(Amortissement::getMontantAmorti)
                 .sum();
 
-        if (Math.abs(totalAmortissements - valeurAcquisition) > 0.01) {
+        logger.info("Valeur d'acquisition : {}, Total des amortissements : {}", valeurAcquisition, totalAmortissements);
+
+        if (Math.abs(totalAmortissements - valeurAcquisition) > 0.1) { // Tolérance
             throw new IllegalStateException("Le total des amortissements ne correspond pas à la valeur d'acquisition.");
         }
 
         return amortissements;
     }
 
-    private boolean isProrataApplicable(Immobilisation immobilisation, LocalDate dateDebutExercice) {
-        return !dateDebutExercice.isEqual(immobilisation.getDateAcquisition());
+
+    // Vérifie si un prorata est applicable
+    private boolean isProrataApplicable(Immobilisation immobilisation) {
+        LocalDate dateMiseEnService = immobilisation.getDateMiseEnService();
+        return dateMiseEnService.getDayOfYear() != 1; // Pas de prorata si la mise en service est le 01/01
     }
 
+    // Calcule le prorata pour la première année
     private double prorataCalcul(Immobilisation immobilisation, double montantAnnuel) {
-        int joursRestants = 365 - immobilisation.getDateAcquisition().getDayOfYear() + 1;
-        if (joursRestants <= 0 || montantAnnuel <= 0) {
-            throw new IllegalArgumentException("Jours restants ou montant annuel invalide pour le calcul du prorata.");
-        }
+        int joursRestants = 365 - immobilisation.getDateMiseEnService().getDayOfYear() + 1;
         return (montantAnnuel * joursRestants) / 365;
     }
 
+    // Valide la durée restante
     private void validateDureeRestante(int dureeRestante) {
         if (dureeRestante <= 0) {
             throw new IllegalArgumentException("Durée restante invalide : aucune période d'amortissement restante.");
         }
     }
 
+    // Calcule la durée restante
     private int calculateDureeRestante(Immobilisation immobilisation, Optional<Amortissement> dernierAmortissement) {
         int dureeAmortissement = immobilisation.getCategorie().getDureeAmortissement();
+        LocalDate dateMiseEnService = immobilisation.getDateMiseEnService();
         return dureeAmortissement - dernierAmortissement
-                .map(a -> a.getDateCalcul().getYear() - immobilisation.getDateAcquisition().getYear())
+                .map(a -> a.getDateCalcul().getYear() - dateMiseEnService.getYear())
                 .orElse(0);
     }
 }

@@ -61,7 +61,7 @@ public class AmortissementServiceImpl implements AmortissementService {
 
         Optional<Amortissement> dernierAmortissement = getDernierAmortissement(immobilisationId);
 
-        if (dernierAmortissement.isPresent() && dernierAmortissement.get().getStatut() == StatutAmmortissement.AMMORTI) {
+        if (dernierAmortissement.isPresent() && dernierAmortissement.get().getStatut() == StatutAmmortissement.AMORTI) {
             throw new RuntimeException("L'immobilisation est déjà entièrement amortie.");
         }
 
@@ -107,7 +107,7 @@ public class AmortissementServiceImpl implements AmortissementService {
         Amortissement amortissement = amortissementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Amortissement introuvable avec l'ID : " + id));
 
-        if (amortissement.getStatut() == StatutAmmortissement.AMMORTI) {
+        if (amortissement.getStatut() == StatutAmmortissement.AMORTI) {
             throw new RuntimeException("Impossible d'annuler un amortissement déjà complet.");
         }
 
@@ -132,6 +132,16 @@ public class AmortissementServiceImpl implements AmortissementService {
                 amortissementMapper.toDTOList(amortissements),
                 cumulAmortissements
         );
+    }
+
+    @Override
+    public List<AmortissementDTO> getAllAmortissements() {
+        return null;
+    }
+
+    @Override
+    public List<AmortissementDTO> getFilteredAmortissements(String categorie, String methode, String etat, String periode) {
+        return null;
     }
 
     private Optional<Amortissement> getDernierAmortissement(Long immobilisationId) {

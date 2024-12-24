@@ -48,11 +48,9 @@ public class AmortissementController {
     @PostMapping("/generate/{immobilisationId}")
     public ResponseEntity<?> generateAmortissements(@PathVariable Long immobilisationId) {
         try {
-            // Récupération de l'immobilisation pour déterminer sa méthode d'amortissement
             Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
                     .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
 
-            // Définir la méthode d'amortissement à partir du type d'immobilisation
             String methode = immobilisation.getTypeAmortissement() != null
                     ? immobilisation.getTypeAmortissement().getLabel()
                     : null;
@@ -61,14 +59,12 @@ public class AmortissementController {
                 throw new RuntimeException("La méthode d'amortissement n'est pas définie pour cette immobilisation.");
             }
 
-            // Génération des amortissements
             List<AmortissementDTO> amortissements = amortissementService.generateAmortissementsForImmobilisation(immobilisationId, methode);
             return ResponseEntity.ok(amortissements);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
-
 
     /**
      * Supprimer un amortissement par ID.
@@ -118,6 +114,44 @@ public class AmortissementController {
             return ResponseEntity.ok(situation);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    /**
+     * Récupérer tous les amortissements.
+     *
+     * @return Liste des AmortissementDTO.
+     */
+    @GetMapping
+    public ResponseEntity<List<AmortissementDTO>> getAllAmortissements() {
+        try {
+            List<AmortissementDTO> amortissements = amortissementService.getAllAmortissements();
+            return ResponseEntity.ok(amortissements);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    /**
+     * Récupérer les amortissements filtrés selon des critères spécifiques.
+     *
+     * @param categorie Catégorie de l'immobilisation (facultatif).
+     * @param methode   Méthode d'amortissement (facultatif).
+     * @param etat      État de l'amortissement (facultatif).
+     * @param periode   Période au format "YYYY-MM" (facultatif).
+     * @return Liste des AmortissementDTO filtrés.
+     */
+    @GetMapping("/filtered")
+    public ResponseEntity<List<AmortissementDTO>> getFilteredAmortissements(
+            @RequestParam(required = false) String categorie,
+            @RequestParam(required = false) String methode,
+            @RequestParam(required = false) String etat,
+            @RequestParam(required = false) String periode) {
+        try {
+            List<AmortissementDTO> filteredAmortissements = amortissementService.getFilteredAmortissements(categorie, methode, etat, periode);
+            return ResponseEntity.ok(filteredAmortissements);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of());
         }
     }
 }

@@ -68,7 +68,7 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
                     .dateDebutExercice(dateDebutExercice.plusYears(i))
                     .dateCalcul(dateDebutExercice.plusYears(i + 1).minusDays(1))
                     .valeurNette(Math.max(valeurComptable, 0.0))
-                    .statut(i == dureeRestante - 1 ? StatutAmmortissement.AMMORTI : StatutAmmortissement.EN_COURS)
+                    .statut(i == dureeRestante - 1 ? StatutAmmortissement.AMORTI : StatutAmmortissement.EN_COURS)
                     .build());
         }
 

@@ -17,4 +17,7 @@ public interface AmortissementService {
     void cancelAmortissement(int id);
 
     SituationAmortissementDTO getSituationAmortissementsAvecCumul(Long immobilisationId, String date);
+
+    List<AmortissementDTO> getAllAmortissements();
+    List<AmortissementDTO> getFilteredAmortissements(String categorie, String methode, String etat, String periode);
 }
