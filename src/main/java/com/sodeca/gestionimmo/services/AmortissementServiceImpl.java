@@ -72,18 +72,16 @@ public class AmortissementServiceImpl implements AmortissementService {
             amortissements.forEach(amortissement -> {
                 amortissement.setCoefficientDegressif(null);
                 amortissement.setTauxDegressif(null);
-                amortissement.setMontantCumule(0.0);
             });
         } else if (TypeAmortissement.DEGRESSIF.getLabel().equalsIgnoreCase(methode)) {
             amortissements = degressifStrategy.calculerAmortissements(immobilisation, dernierAmortissement);
             amortissements.forEach(amortissement -> {
                 amortissement.setTauxAnnuel(null);
-                amortissement.setProrata(null);
             });
-        } else {
-            throw new RuntimeException("Méthode d'amortissement non reconnue : " + methode);
         }
-
+        else {
+            throw new RuntimeException("Méthode d'amortissement non supportée : " + methode);
+        }
         amortissementRepository.saveAll(amortissements);
 
         logger.info("Amortissements successfully generated for immobilisation ID: {}", immobilisationId);

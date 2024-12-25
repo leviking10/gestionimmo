@@ -20,7 +20,6 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
     @Override
     public List<Amortissement> calculerAmortissements(Immobilisation immobilisation, Optional<Amortissement> dernierAmortissement) {
         List<Amortissement> amortissements = new ArrayList<>();
-
         double valeurComptable = dernierAmortissement.map(Amortissement::getValeurNette)
                 .orElse(immobilisation.getValeurAcquisition());
         int dureeAmortissement = immobilisation.getCategorie().getDureeAmortissement();
@@ -33,38 +32,81 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
 
         LocalDate dateDebutExercice = dernierAmortissement
                 .map(Amortissement::getDateCalcul)
-                .orElse(LocalDate.of(immobilisation.getDateAcquisition().getYear(), 1, 1));
+                .orElse(immobilisation.getDateMiseEnService().withDayOfYear(1));
 
         double montantCumule = dernierAmortissement.map(Amortissement::getMontantCumule).orElse(0.0);
         double totalAmortissementCalcule = 0.0;
+        boolean utiliserLineaire = false;
 
         for (int i = 0; i < dureeRestante; i++) {
-            double montantAmorti = valeurComptable * (tauxDegressif / 100);
+            double montantAmortiDegressif = valeurComptable * (tauxDegressif / 100);
+            double montantAmortiLineaire = valeurComptable / (dureeRestante - i);
 
-            // Calcul du prorata pour la première année
+            // Transition au linéaire si applicable
+            if (montantAmortiLineaire > montantAmortiDegressif) {
+                utiliserLineaire = true;
+                montantAmortiDegressif = montantAmortiLineaire;
+            }
+
+            // Gestion du prorata pour la première année
             if (i == 0 && isProrataApplicable(immobilisation, dateDebutExercice)) {
-                montantAmorti = prorataCalculDegressif(immobilisation, montantAmorti);
+                double montantProrata = prorataCalculDegressif(immobilisation, montantAmortiDegressif);
+                valeurComptable -= montantProrata;
+                montantCumule += montantProrata;
+
+                logger.info("Prorata appliqué : Montant prorata = {}, Cumul = {}", montantProrata, montantCumule);
+
+                amortissements.add(Amortissement.builder()
+                        .immobilisation(immobilisation)
+                        .methode("Dégressif")
+                        .montantAmorti(montantProrata)
+                        .montantCumule(montantCumule)
+                        .coefficientDegressif(coefficient)
+                        .tauxDegressif(tauxDegressif)
+                        .dateDebutExercice(dateDebutExercice)
+                        .dateCalcul(dateDebutExercice.plusMonths(12 - immobilisation.getDateAcquisition().getMonthValue()))
+                        .valeurNette(Math.max(valeurComptable, 0.0))
+                        .statut(StatutAmmortissement.EN_COURS)
+                        .build());
+
+                // Ligne complémentaire pour l'année
+                double montantComplement = montantAmortiDegressif - montantProrata;
+                valeurComptable -= montantComplement;
+                montantCumule += montantComplement;
+
+                logger.info("Complément après prorata : Montant complément = {}, Cumul = {}", montantComplement, montantCumule);
+
+                amortissements.add(Amortissement.builder()
+                        .immobilisation(immobilisation)
+                        .methode("Dégressif")
+                        .montantAmorti(montantComplement)
+                        .montantCumule(montantCumule)
+                        .coefficientDegressif(coefficient)
+                        .tauxDegressif(tauxDegressif)
+                        .dateDebutExercice(dateDebutExercice.plusMonths(12 - immobilisation.getDateAcquisition().getMonthValue()))
+                        .dateCalcul(dateDebutExercice.plusYears(1).minusDays(1))
+                        .valeurNette(Math.max(valeurComptable, 0.0))
+                        .statut(StatutAmmortissement.EN_COURS)
+                        .build());
+
+                dateDebutExercice = dateDebutExercice.plusYears(1);
+                continue;
             }
 
-            // Ajustement pour la dernière année
-            if (i == dureeRestante - 1) {
-                montantAmorti = immobilisation.getValeurAcquisition() - totalAmortissementCalcule; // Ajustement final
-            }
-
+            // Année sans prorata ou après le prorata
+            double montantAmorti = Math.min(montantAmortiDegressif, valeurComptable);
             valeurComptable -= montantAmorti;
             montantCumule += montantAmorti;
-            totalAmortissementCalcule += montantAmorti;
 
-            logger.info("Calcul dégressif - Année {} : Montant amorti={}, Valeur nette={}, Montant cumulé={}, Total Calculé={}",
-                    i + 1, montantAmorti, valeurComptable, montantCumule, totalAmortissementCalcule);
+            logger.info("Année {} : Méthode = {}, Montant amorti = {}, Cumul = {}", i + 1, utiliserLineaire ? "Linéaire" : "Dégressif", montantAmorti, montantCumule);
 
             amortissements.add(Amortissement.builder()
                     .immobilisation(immobilisation)
-                    .methode("Dégressif")
+                    .methode(utiliserLineaire ? "Linéaire" : "Dégressif")
                     .montantAmorti(montantAmorti)
-                    .coefficientDegressif(coefficient)
-                    .tauxDegressif(tauxDegressif)
                     .montantCumule(montantCumule)
+                    .coefficientDegressif(coefficient)
+                    .tauxDegressif(utiliserLineaire ? null : tauxDegressif)
                     .dateDebutExercice(dateDebutExercice.plusYears(i))
                     .dateCalcul(dateDebutExercice.plusYears(i + 1).minusDays(1))
                     .valeurNette(Math.max(valeurComptable, 0.0))
@@ -72,9 +114,8 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
                     .build());
         }
 
-        // Validation finale pour s'assurer que la somme des montants cumulés est correcte
-        validateAmortissementTotal(immobilisation, montantCumule);
 
+        validateAmortissementTotal(immobilisation, montantCumule);
         return amortissements;
     }
 

@@ -1,6 +1,7 @@
 package com.sodeca.gestionimmo.dto;
 
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class AmortissementDTO {
     private StatutAmmortissement statut; // Statut de l'amortissement (ex. "En cours", "ammorti", "annulé")
     private Double tauxDegressif;
     private double montantCumule;
+    private Double coefficientDegressif;
     private Double tauxAnnuel;
     private Double prorata;
 
