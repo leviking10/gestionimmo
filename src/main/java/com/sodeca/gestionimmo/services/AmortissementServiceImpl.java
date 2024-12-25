@@ -75,9 +75,7 @@ public class AmortissementServiceImpl implements AmortissementService {
             });
         } else if (TypeAmortissement.DEGRESSIF.getLabel().equalsIgnoreCase(methode)) {
             amortissements = degressifStrategy.calculerAmortissements(immobilisation, dernierAmortissement);
-            amortissements.forEach(amortissement -> {
-                amortissement.setTauxAnnuel(null);
-            });
+            amortissements.forEach(amortissement -> amortissement.setTauxAnnuel(null));
         }
         else {
             throw new RuntimeException("Méthode d'amortissement non supportée : " + methode);
