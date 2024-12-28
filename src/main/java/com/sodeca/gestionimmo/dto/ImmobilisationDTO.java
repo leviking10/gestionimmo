@@ -1,6 +1,4 @@
 package com.sodeca.gestionimmo.dto;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 import com.sodeca.gestionimmo.enums.StatutAffectation;
 import com.sodeca.gestionimmo.enums.TypeAmortissement;
@@ -31,15 +29,9 @@ public class ImmobilisationDTO {
     private String qrCode;
     private LocalDate dateMiseEnService;
     private int dureeAmortissement;
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private EtatImmobilisation etatImmobilisation;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private StatutAffectation statutAffectation;
-
-
+    private StatutAffectation affectation;
     @NotNull(message = "Le type d'immobilisation est obligatoire")
     private TypeImmobilisation type;
-
     private TypeAmortissement typeAmortissement ;
 }

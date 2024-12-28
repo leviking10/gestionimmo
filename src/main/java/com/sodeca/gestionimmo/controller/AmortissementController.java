@@ -5,6 +5,8 @@ import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
 import com.sodeca.gestionimmo.services.AmortissementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,7 @@ public class AmortissementController {
 
     private final AmortissementService amortissementService;
     private final ImmobilisationRepository immobilisationRepository;
-
+private final Logger logger = LoggerFactory.getLogger(AmortissementController.class);
     public AmortissementController(AmortissementService amortissementService, ImmobilisationRepository immobilisationRepository) {
         this.amortissementService = amortissementService;
         this.immobilisationRepository = immobilisationRepository;
@@ -110,13 +112,14 @@ public class AmortissementController {
             @PathVariable Long immobilisationId,
             @RequestParam String date) {
         try {
+            logger.info("Fetching situation cumul for immobilisation ID: {} up to date: {}", immobilisationId, date);
             SituationAmortissementDTO situation = amortissementService.getSituationAmortissementsAvecCumul(immobilisationId, date);
             return ResponseEntity.ok(situation);
         } catch (RuntimeException ex) {
+            logger.error("Error fetching situation cumul for immobilisation ID: {} up to date: {}", immobilisationId, date, ex);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
-
     /**
      * Récupérer tous les amortissements.
      *

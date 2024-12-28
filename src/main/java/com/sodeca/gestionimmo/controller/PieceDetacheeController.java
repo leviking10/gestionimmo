@@ -4,6 +4,7 @@ import com.sodeca.gestionimmo.dto.PieceDetacheeDTO;
 import com.sodeca.gestionimmo.dto.MouvementStockDTO;
 import com.sodeca.gestionimmo.dto.InventaireDTO;
 import com.sodeca.gestionimmo.services.PieceDetacheeService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -67,7 +68,7 @@ public class PieceDetacheeController {
         return ResponseEntity.ok(service.getMouvementsByPiece(id));
     }
 
-    @PostMapping(value = "/upload-pieces", consumes = "multipart/form-data")
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<List<PieceDetacheeDTO>> importPieces(@RequestParam("file") MultipartFile file) {
         try {
             List<PieceDetacheeDTO> importedPieces = service.importPiecesFromFile(file);
@@ -76,6 +77,13 @@ public class PieceDetacheeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+    @Operation(summary = "Récupère tous les approvisionnements")
+    @GetMapping("/approvisionnements")
+    public ResponseEntity<List<MouvementStockDTO>> getApprovisionnements() {
+        List<MouvementStockDTO> approvisionnements = service.getApprovisionnements();
+        return ResponseEntity.ok(approvisionnements);
+    }
+
 
     @PostMapping(value = "/upload-approvisionnements", consumes = "multipart/form-data")
     public ResponseEntity<List<MouvementStockDTO>> importApprovisionnements(@RequestParam("file") MultipartFile file) {

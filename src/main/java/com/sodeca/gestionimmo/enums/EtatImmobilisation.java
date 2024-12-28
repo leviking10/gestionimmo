@@ -1,26 +1,39 @@
 package com.sodeca.gestionimmo.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
+import jakarta.validation.constraints.NotNull;
 
-@Getter
+import java.util.Arrays;
+
 public enum EtatImmobilisation {
-    EN_SERVICE,
-    EN_MAINTENANCE,
-    HORS_SERVICE ,
-    PLANIFIE ,
-    SIGNALE;
+    EN_SERVICE("En service"),
+    EN_MAINTENANCE("En maintenance"),
+    HORS_SERVICE("Hors service"),
+    PLANIFIE("Planifié"),
+    SIGNALE("Signalé");
 
+    private final String label;
+
+    // Constructeur
+    EtatImmobilisation(String label) {
+        this.label = label;
+    }
+
+    // Méthode pour récupérer le libellé
+    @JsonValue
+    public String getLabel() {
+        return label;
+    }
+
+    // Méthode statique pour créer une instance à partir d'une chaîne
     @JsonCreator
-    public static EtatImmobilisation fromLabel(String value) {
-        if (value == null || value.isEmpty()) {
-            return null;
+    public static EtatImmobilisation fromLabelOrName(String value) {
+        for (EtatImmobilisation etat : values()) {
+            if (etat.name().equalsIgnoreCase(value) || etat.getLabel().equalsIgnoreCase(value)) {
+                return etat;
+            }
         }
-        try {
-            return EtatImmobilisation.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Etat d'immobilisation inconnu : " + value);
-        }
-
+        throw new IllegalArgumentException("Type d'amortissement invalide : " + value);
     }
 }

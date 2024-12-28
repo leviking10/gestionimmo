@@ -1,10 +1,14 @@
 package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.SignalementDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface SignalementService {
+
+    @Transactional
+    void cancelSignalement(Long signalementId);
 
     SignalementDTO createSignalement(SignalementDTO signalementDTO);
 

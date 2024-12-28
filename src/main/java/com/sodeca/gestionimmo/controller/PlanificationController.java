@@ -29,6 +29,12 @@ public class PlanificationController {
         PlanificationDTO updatedPlanification = planificationService.updatePlanification(id, dto);
         return ResponseEntity.ok(updatedPlanification);
     }
+    @GetMapping
+    public ResponseEntity<List<PlanificationDTO>> getAllPlanifications() {
+        // Appelle la méthode du service pour récupérer toutes les planifications
+        List<PlanificationDTO> planifications = planificationService.getAllPlanifications();
+        return ResponseEntity.ok(planifications);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlanificationDTO> getPlanificationById(@PathVariable Long id) {

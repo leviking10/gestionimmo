@@ -20,4 +20,6 @@ public interface CessionRepository extends JpaRepository<Cession, Long> {
 
     // Compter les cessions par statut
     Long countByStatutCession(StatutCession statut);
+
+    boolean existsByImmobilisationId(Long immobilisationId);
 }

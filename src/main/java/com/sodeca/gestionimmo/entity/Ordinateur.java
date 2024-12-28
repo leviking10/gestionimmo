@@ -26,7 +26,6 @@ public class Ordinateur extends Immobilisation {
     private String ram;
     private String disqueDur;
     private String os;
-    private String etat;
     @Column(unique = true) // Rend le champ unique et non null
     private String numeroSerie;
 }

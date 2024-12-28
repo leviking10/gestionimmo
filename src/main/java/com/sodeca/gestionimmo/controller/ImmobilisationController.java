@@ -131,12 +131,18 @@ public class ImmobilisationController {
 
     // Mettre à jour l'état d'une immobilisation
     @PutMapping("/etat/{id}")
-    public ResponseEntity<Void> updateEtat(
-            @PathVariable Long id,
-            @RequestParam EtatImmobilisation etat) {
-        immobilisationService.updateEtat(id, etat);
+    public ResponseEntity<?> updateEtat(@PathVariable Long id, @RequestParam String etat) {
+        EtatImmobilisation etatImmobilisation;
+        try {
+            etatImmobilisation = EtatImmobilisation.fromLabelOrName(etat);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Etat invalide : " + etat);
+        }
+
+        immobilisationService.updateEtat(id, etatImmobilisation);
         return ResponseEntity.ok().build();
     }
+
 
     /**
      * Importer un fichier Excel ou CSV pour créer des immobilisations.

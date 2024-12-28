@@ -5,6 +5,7 @@ import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
 import com.sodeca.gestionimmo.entity.Amortissement;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
+import com.sodeca.gestionimmo.enums.StatutCession;
 import com.sodeca.gestionimmo.enums.TypeAmortissement;
 import com.sodeca.gestionimmo.mapper.AmortissementMapper;
 import com.sodeca.gestionimmo.repository.AmortissementRepository;
@@ -114,20 +115,54 @@ public class AmortissementServiceImpl implements AmortissementService {
     @Override
     public SituationAmortissementDTO getSituationAmortissementsAvecCumul(Long immobilisationId, String date) {
         logger.info("Fetching amortissement situation for immobilisation ID: {} up to date: {}", immobilisationId, date);
-        LocalDate filterDate = LocalDate.parse(date);
+
+        // Rendre filterDate "effectivement finale"
+        final LocalDate filterDate = LocalDate.parse(date);
+
+        // Récupérer l'immobilisation
+        Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
+                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
+
+        // Vérifier si l'immobilisation a une date de sortie
+        LocalDate adjustedDate;
+        if (immobilisation.getDateCession() != null && immobilisation.getDateCession().isBefore(filterDate)) {
+            adjustedDate = immobilisation.getDateCession();
+            logger.info("La date de sortie ({}) limite le calcul des amortissements.", adjustedDate);
+        } else {
+            adjustedDate = filterDate;
+        }
+
+        // Filtrer les amortissements jusqu'à la date ajustée
         List<Amortissement> amortissements = amortissementRepository.findByImmobilisationId(immobilisationId)
                 .stream()
-                .filter(amortissement -> !amortissement.getDateCalcul().isAfter(filterDate))
+                .filter(amortissement -> !amortissement.getDateCalcul().isAfter(adjustedDate))
                 .toList();
 
+        // Calculer le cumul des amortissements
         double cumulAmortissements = amortissements.stream()
                 .mapToDouble(Amortissement::getMontantAmorti)
                 .sum();
 
-        return new SituationAmortissementDTO(
-                amortissementMapper.toDTOList(amortissements),
-                cumulAmortissements
-        );
+        // Calculer la valeur nette comptable (V.N.C)
+        double valeurNette = immobilisation.getValeurAcquisition() - cumulAmortissements;
+
+        // Déterminer le statut à date
+        String statut;
+        if (immobilisation.getStatutCession() == StatutCession.SORTIE || immobilisation.getStatutCession() == StatutCession.MISE_EN_REBUT) {
+            statut = "SORTIE";
+        } else if (valeurNette <= 0) {
+            statut = "AMORTI";
+        } else {
+            statut = "EN_COURS";
+        }
+
+        // Créer et retourner le DTO
+        return SituationAmortissementDTO.builder()
+                .amortissements(amortissementMapper.toDTOList(amortissements))
+                .cumulAmortissements(cumulAmortissements)
+                .valeurNette(valeurNette)
+                .statut(statut)
+                .build();
     }
 
     @Override

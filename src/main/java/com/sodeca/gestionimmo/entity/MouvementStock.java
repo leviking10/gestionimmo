@@ -32,5 +32,13 @@ public class MouvementStock {
     private LocalDateTime dateMouvement;
 
     @Column
-    private String commentaire;
+    private String commentaire; @PrePersist
+    public void adjustQuantite() {
+        // Ajuste la quantité selon le type de mouvement
+        if (typeMouvement == TypeMouvement.SORTIE) {
+            quantite = -Math.abs(quantite); // Toujours négatif pour les sorties
+        } else if (typeMouvement == TypeMouvement.ENTREE) {
+            quantite = Math.abs(quantite); // Toujours positif pour les entrées
+        }
+    }
 }

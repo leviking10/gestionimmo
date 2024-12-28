@@ -20,4 +20,6 @@ public class InterventionDTO {
     private Long technicienId;
     private String description;
     private String rapport;
+    private Long planificationId; // ID de la planification associée, si applicable
+
 }

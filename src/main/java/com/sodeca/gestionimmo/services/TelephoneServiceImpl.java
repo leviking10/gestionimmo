@@ -35,16 +35,19 @@ public class TelephoneServiceImpl implements TelephoneService {
     }
     @Override
     public TelephoneDTO updateTelephone(Long id, TelephoneDTO dto) {
-        Telephone telephone = telephoneRepository.findById(id)
+        // Récupérer le téléphone existant
+        Telephone existingTelephone = telephoneRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Téléphone non trouvé avec l'ID : " + id));
 
-        // Mise à jour des champs techniques spécifiques au téléphone
-        telephone.setMarque(dto.getMarque());
-        telephone.setModele(dto.getModele());
-        telephone.setImei(dto.getImei());
-        telephone.setNumeroSerie(dto.getNumeroSerie());
-        telephone.setEtatImmo(dto.getEtatImmobilisation());
-        Telephone updated = telephoneRepository.save(telephone);
-        return mapper.toTelephoneDTO(updated);
+        // Mettre à jour les champs spécifiques
+        existingTelephone.setMarque(dto.getMarque());
+        existingTelephone.setModele(dto.getModele());
+        existingTelephone.setImei(dto.getImei());
+        existingTelephone.setNumeroSerie(dto.getNumeroSerie());
+        existingTelephone.setEtatImmo(dto.getEtatImmobilisation());
+        existingTelephone.setStatut(dto.getAffectation());
+        // Sauvegarder et retourner le DTO mis à jour
+        Telephone updatedTelephone = telephoneRepository.save(existingTelephone);
+        return mapper.toTelephoneDTO(updatedTelephone);
     }
 }

@@ -1,6 +1,9 @@
 package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.MouvementStockDTO;
+import com.sodeca.gestionimmo.enums.TypeMouvement;
+
+import java.time.LocalDateTime;
 import java.util.List;
 public interface MouvementStockService {
 
@@ -10,6 +13,11 @@ public interface MouvementStockService {
      * @return Liste des mouvements de stock.
      */
     List<MouvementStockDTO> getAllMouvements();
+
+
+    List<MouvementStockDTO> searchMouvements(TypeMouvement type, LocalDateTime startDate, LocalDateTime endDate);
+
+    MouvementStockDTO createMouvement(MouvementStockDTO dto);
 
     /**
      * Obtenir les mouvements de stock pour une pièce donnée.

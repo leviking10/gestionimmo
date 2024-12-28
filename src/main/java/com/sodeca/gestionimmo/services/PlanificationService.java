@@ -4,6 +4,8 @@ import com.sodeca.gestionimmo.dto.PlanificationDTO;
 import java.util.List;
 
 public interface PlanificationService {
+    List<PlanificationDTO> getAllPlanifications();
+
     PlanificationDTO createPlanification(PlanificationDTO planificationDTO);
 
     PlanificationDTO updatePlanification(Long id, PlanificationDTO planificationDTO);

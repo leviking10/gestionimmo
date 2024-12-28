@@ -32,4 +32,6 @@ public interface PieceDetacheeService {
     MouvementStockDTO validerDemande(Long demandeId);
 
     List<InventaireDTO> getInventaire();
+
+    List<MouvementStockDTO> getApprovisionnements();
 }

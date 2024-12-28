@@ -2,6 +2,7 @@ package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.OrdinateurDTO;
 import com.sodeca.gestionimmo.entity.Ordinateur;
+import com.sodeca.gestionimmo.enums.EtatImmobilisation;
 import com.sodeca.gestionimmo.mapper.ImmobilisationMapper;
 import com.sodeca.gestionimmo.repository.OrdinateurRepository;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class OrdinateurServiceImpl implements OrdinateurService {
         existingOrdinateur.setRam(dto.getRam());
         existingOrdinateur.setDisqueDur(dto.getDisqueDur());
         existingOrdinateur.setOs(dto.getOs());
-        existingOrdinateur.setEtat(dto.getEtat());
+        existingOrdinateur.setEtatImmo(EtatImmobilisation.valueOf(dto.getEtat()));
         existingOrdinateur.setNumeroSerie(dto.getNumeroSerie());
 
         // Sauvegarder et retourner le DTO mis à jour

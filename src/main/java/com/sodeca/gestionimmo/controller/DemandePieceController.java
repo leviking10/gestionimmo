@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/demandes")
@@ -41,10 +43,24 @@ public class DemandePieceController {
      * @return La demande validée.
      */
     @PutMapping("/{id}/valider")
-    public ResponseEntity<DemandePieceDTO> validerDemande(@PathVariable Long id) {
+    public ResponseEntity<?> validerDemande(@PathVariable Long id) {
         try {
             DemandePieceDTO validatedDemande = service.validerDemande(id);
             return ResponseEntity.ok(validatedDemande);
+        } catch (RuntimeException e) {
+            // Retourne un message d'erreur clair dans un objet JSON
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "error", e.getMessage(),
+                    "timestamp", LocalDateTime.now(),
+                    "status", HttpStatus.BAD_REQUEST.value()
+            ));
+        }
+    }
+    @PutMapping("/{id}/livrer")
+    public ResponseEntity<DemandePieceDTO> livrerDemande(@PathVariable Long id) {
+        try {
+            DemandePieceDTO deliveredDemande = service.livrerDemande(id);
+            return ResponseEntity.ok(deliveredDemande);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -119,4 +135,15 @@ public class DemandePieceController {
         List<DemandePieceDTO> nonValidees = service.getDemandesNonValidees();
         return ResponseEntity.ok(nonValidees);
     }
+    @PutMapping("/{id}/rejeter")
+    public ResponseEntity<DemandePieceDTO> rejeterDemande(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        String commentaire = payload.get("commentaire");
+        try {
+            DemandePieceDTO rejectedDemande = service.rejeterDemande(id, commentaire);
+            return ResponseEntity.ok(rejectedDemande);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
 }

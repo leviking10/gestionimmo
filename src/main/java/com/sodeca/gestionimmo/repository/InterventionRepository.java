@@ -3,7 +3,9 @@ package com.sodeca.gestionimmo.repository;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.entity.Intervention;
 import com.sodeca.gestionimmo.entity.Personnel;
+import com.sodeca.gestionimmo.entity.Planification;
 import com.sodeca.gestionimmo.enums.StatutIntervention;
+import com.sodeca.gestionimmo.enums.TypeIntervention;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -51,4 +53,8 @@ public interface InterventionRepository extends JpaRepository<Intervention, Long
      * @return Liste des interventions.
      */
     List<Intervention> findByDatePlanificationBetween(LocalDate startDate, LocalDate endDate);
+
+    void deleteByImmobilisationAndTypeAndStatut(Immobilisation immobilisation, TypeIntervention typeIntervention, StatutIntervention statutIntervention);
+
+    List<Intervention> findByPlanification(Planification planification);
 }

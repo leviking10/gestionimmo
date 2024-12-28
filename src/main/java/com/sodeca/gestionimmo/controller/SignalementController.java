@@ -32,6 +32,11 @@ public class SignalementController {
     public List<SignalementDTO> getSignalementsByImmobilisation(@PathVariable Long immobilisationId) {
         return signalementService.getSignalementsByImmobilisation(immobilisationId);
     }
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelSignalement(@PathVariable Long id) {
+        signalementService.cancelSignalement(id);
+        return ResponseEntity.noContent().build();
+    }
 
     /**
      * Récupérer tous les signalements faits par un membre du personnel donné.

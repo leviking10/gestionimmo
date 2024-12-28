@@ -13,6 +13,10 @@ public interface DemandePieceService {
      */
     DemandePieceDTO createDemande(DemandePieceDTO dto);
 
+    DemandePieceDTO rejeterDemande(Long id, String commentaire);
+
+    DemandePieceDTO livrerDemande(Long id);
+
     /**
      * Valide une demande existante.
      *

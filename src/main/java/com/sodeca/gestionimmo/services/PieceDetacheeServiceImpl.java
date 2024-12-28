@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PieceDetacheeServiceImpl implements PieceDetacheeService {
@@ -63,6 +62,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
         piece.setReference(dto.getReference());
         piece.setDescription(dto.getDescription());
         piece.setStockDisponible(dto.getStockDisponible());
+        piece.setStockMinimum(dto.getStockMinimum());
         PieceDetachee updatedPiece = pieceRepository.save(piece);
         return pieceMapper.toDTO(updatedPiece);
     }
@@ -86,7 +86,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
     public List<PieceDetacheeDTO> getAllPieces() {
         return pieceRepository.findAll().stream()
                 .map(pieceMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -137,7 +137,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
         DemandePiece demande = demandeRepository.findById(demandeId)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + demandeId));
 
-        if (demande.getStatut() == StatutDemande.APPROUVEE || demande.getStatut() == StatutDemande.ANNULEE) {
+        if (demande.getStatut() == StatutDemande.APPROUVE || demande.getStatut() == StatutDemande.ANNULE) {
             throw new RuntimeException("La demande ne peut pas être validée car elle est déjà traitée ou annulée.");
         }
 
@@ -157,7 +157,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
         mouvement.setDateMouvement(LocalDateTime.now());
         mouvementRepository.save(mouvement);
 
-        demande.setStatut(StatutDemande.APPROUVEE);
+        demande.setStatut(StatutDemande.APPROUVE);
         demandeRepository.save(demande);
 
         return mouvementMapper.toDTO(mouvement);
@@ -176,4 +176,11 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
                 ))
                 .toList();
     }
+    @Override
+    public List<MouvementStockDTO> getApprovisionnements() {
+        return mouvementRepository.findByTypeMouvement(TypeMouvement.ENTREE).stream()
+                .map(mouvementMapper::toDTO)
+                .toList();
+    }
+
 }

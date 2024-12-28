@@ -3,7 +3,8 @@ package com.sodeca.gestionimmo.enums;
 public enum StatutCession {
     DISPONIBLE("Disponible"),
     VENDU("Vendu"),
-    REBUTE("Rébuté");
+    SORTIE("sortie"),
+    MISE_EN_REBUT("Mise en rebut"),;
     private final String description;
 
     StatutCession(String description) {

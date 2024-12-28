@@ -2,6 +2,8 @@ package com.sodeca.gestionimmo.mapper;
 
 import com.sodeca.gestionimmo.dto.*;
 import com.sodeca.gestionimmo.entity.*;
+import com.sodeca.gestionimmo.enums.EtatImmobilisation;
+import com.sodeca.gestionimmo.enums.StatutAffectation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -14,14 +16,14 @@ public interface ImmobilisationMapper {
     @Mapping(expression = "java(immobilisation.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     @Mapping(source = "type", target = "type")
     @Mapping(source = "etatImmo", target = "etatImmobilisation")
-    @Mapping(source = "statut", target = "statutAffectation")
+    @Mapping(source = "statut", target = "affectation")
     ImmobilisationDTO toDTO(Immobilisation immobilisation);
 
     // Conversion générique pour ImmobilisationDTO -> Immobilisation
     @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     @Mapping(source = "type", target = "type")
     @Mapping(source = "etatImmobilisation", target = "etatImmo")
-    @Mapping(source = "statutAffectation", target = "statut")
+    @Mapping(source = "affectation", target = "statut")
     Immobilisation toEntity(ImmobilisationDTO dto);
 
     // Conversion spécifique pour Ordinateur
@@ -85,8 +87,10 @@ public interface ImmobilisationMapper {
         return toDTO(immobilisation);
     }
 
+
     // Conversion polymorphique : ImmobilisationDTO -> Immobilisation
     default Immobilisation toPolymorphicEntity(ImmobilisationDTO dto) {
+        System.out.println("Mapping DTO -> Entity : Etat = " + dto.getEtatImmobilisation() + ", Statut = " + dto.getAffectation());
         if (dto == null || dto.getType() == null) {
             throw new IllegalArgumentException("DTO ou type d'immobilisation invalide");
         }
@@ -117,17 +121,17 @@ public interface ImmobilisationMapper {
         entity.setId(dto.getId());
         entity.setCodeImmo(dto.getCodeImmo());
         entity.setDesignation(dto.getDesignation());
-        entity.setCategorie(new Categorie()); // Assurez-vous que `Categorie` est correctement mappé
+        entity.setCategorie(new Categorie());
         entity.getCategorie().setCategorie(dto.getCategorieDesignation());
         entity.setDateAcquisition(dto.getDateAcquisition());
         entity.setValeurAcquisition(dto.getValeurAcquisition());
         entity.setLocalisation(dto.getLocalisation());
         entity.setQrCode(dto.getQrCode());
         entity.setDateMiseEnService(dto.getDateMiseEnService());
-        entity.setStatut(dto.getStatutAffectation());
+        entity.setStatut(dto.getAffectation());
         entity.setEtatImmo(dto.getEtatImmobilisation());
         entity.setTypeAmortissement(dto.getTypeAmortissement());
-        entity.setCreatedDate(null); // Si nécessaire, laissez Hibernate gérer
+        entity.setCreatedDate(null);
         entity.setLastModifiedDate(null);
 
         return entity;
@@ -152,4 +156,5 @@ public interface ImmobilisationMapper {
         immobilisation.setId(id);
         return immobilisation;
     }
+
 }

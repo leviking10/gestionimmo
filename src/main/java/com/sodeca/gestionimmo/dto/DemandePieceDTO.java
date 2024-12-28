@@ -1,5 +1,6 @@
 package com.sodeca.gestionimmo.dto;
 
+import com.sodeca.gestionimmo.enums.StatutDemande;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,10 +16,9 @@ public class DemandePieceDTO {
     private Long technicienId;
     private int quantiteDemandee;
     private String commentaire;
-    private String statut; // Ajout pour le statut de la demande
-    private boolean validee;
-    private boolean annulee;
+    private StatutDemande statut; // Ajout pour le statut de la demande
     private LocalDateTime dateDemande;
     private LocalDateTime dateValidation;
     private LocalDateTime dateAnnulation;
+    private LocalDateTime dateLivraison;
 }

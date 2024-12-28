@@ -24,8 +24,7 @@ public class DemandePiece {
     private LocalDateTime dateDemande;
     @Enumerated(EnumType.STRING)
     private StatutDemande statut;
-    private boolean validee;
-    private boolean annulee; // Indique si la demande est annulée
-    private LocalDateTime dateValidation; // Date de validation
-    private LocalDateTime dateAnnulation; // Date d'annulation
+    private LocalDateTime dateValidation;
+    private LocalDateTime dateAnnulation;
+    private LocalDateTime dateLivraison;
 }

@@ -34,11 +34,4 @@ public interface DemandePieceRepository extends JpaRepository<DemandePiece, Long
      */
     List<DemandePiece> findByStatut(StatutDemande statut);
 
-    /**
-     * Trouve toutes les demandes non validées.
-     *
-     * @param validee état de validation
-     * @return une liste des demandes non validées
-     */
-    List<DemandePiece> findByValidee(boolean validee);
 }

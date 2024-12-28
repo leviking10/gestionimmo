@@ -77,8 +77,8 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
             immobilisation.setCategorie(categorie);
 
-            if (dto.getStatutAffectation() == null) {
-                dto.setStatutAffectation(StatutAffectation.DISPONIBLE);
+            if (dto.getAffectation() == null) {
+                dto.setAffectation(StatutAffectation.DISPONIBLE);
             }
             if (dto.getEtatImmobilisation() == null) {
                 dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
@@ -121,8 +121,8 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     public ImmobilisationDTO createImmobilisation(ImmobilisationDTO dto) {
         // Récupérer la catégorie par désignation
         // Ajout des valeurs par défaut pour les champs obligatoires
-        if (dto.getStatutAffectation() == null) {
-            dto.setStatutAffectation(StatutAffectation.DISPONIBLE);
+        if (dto.getAffectation() == null) {
+            dto.setAffectation(StatutAffectation.DISPONIBLE);
         }
         if (dto.getEtatImmobilisation() == null) {
             dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
@@ -144,18 +144,10 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         immobilisation.setType(TypeImmobilisation.valueOf(dto.getType().name()));
         immobilisation.setTypeAmortissement(TypeAmortissement.valueOf(dto.getTypeAmortissement().name()));
         Immobilisation savedImmobilisation = immobilisationRepository.save(immobilisation);
-        // Générer et assigner un QR Code si nécessaire
-        if (savedImmobilisation.getQrCode() == null || savedImmobilisation.getQrCode().isEmpty()) {
-            try {
-                String qrCodeData = "https://gestionimmo.sodeca.com/immobilisation/" + savedImmobilisation.getCodeImmo();
-                String qrCodeBase64 = generateQRCode(qrCodeData);
-                savedImmobilisation.setQrCode(qrCodeBase64);
-                immobilisationRepository.save(savedImmobilisation);
+        generateAndAssignQRCode(immobilisation);
+        immobilisationRepository.save(savedImmobilisation);
                 System.out.println("Type dans DTO : " + dto.getTypeAmortissement());
-            } catch (Exception e) {
-                throw new RuntimeException("Erreur lors de la génération du QR Code", e);
-            }
-        }
+
 
         return mapper.toPolymorphicDTO(savedImmobilisation);
 
@@ -193,8 +185,8 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             ancienneImmobilisation.setEtatImmo(dto.getEtatImmobilisation());
         }
 
-        if (dto.getStatutAffectation() != null) {
-            ancienneImmobilisation.setStatut(dto.getStatutAffectation());
+        if (dto.getAffectation() != null) {
+            ancienneImmobilisation.setStatut(dto.getAffectation());
         }
 
         if (dto.getTypeAmortissement() != null) {
@@ -258,7 +250,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     public List<ImmobilisationDTO> getImmobilisationsCedees() {
         return immobilisationRepository.findAll().stream()
                 .filter(immobilisation -> immobilisation.getStatutCession() == StatutCession.VENDU ||
-                        immobilisation.getStatutCession() == StatutCession.REBUTE)
+                        immobilisation.getStatutCession() == StatutCession.MISE_EN_REBUT||immobilisation.getStatutCession()==StatutCession.SORTIE)
                 .map(mapper::toPolymorphicDTO)
                 .toList();
     }
@@ -390,7 +382,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             dto.setTypeAmortissement(TypeAmortissement.valueOf(typeAmortissement));
 
             // Champs par défaut
-            dto.setStatutAffectation(StatutAffectation.DISPONIBLE);
+            dto.setAffectation(StatutAffectation.DISPONIBLE);
             dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
 
             return dto;
@@ -466,7 +458,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             dto.setTypeAmortissement(TypeAmortissement.valueOf(typeAmortissement));
 
             // Ajout des champs `statut` et `etatImmo`
-            dto.setStatutAffectation(StatutAffectation.DISPONIBLE); // Par défaut
+            dto.setAffectation(StatutAffectation.DISPONIBLE); // Par défaut
             dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE); // Par défaut
 
             return dto;
@@ -485,6 +477,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
             immobilisation.setCategorie(categorie);
             immobilisation.setCodeImmo(generateUniqueCodeImmo());
+            generateAndAssignQRCode(immobilisation);
             return immobilisation;
         }).toList();
 

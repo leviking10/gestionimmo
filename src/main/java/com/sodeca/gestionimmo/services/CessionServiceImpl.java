@@ -6,6 +6,8 @@ import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.StatutCession;
 import com.sodeca.gestionimmo.repository.CessionRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,7 +18,7 @@ public class CessionServiceImpl implements CessionService {
 
     private final CessionRepository cessionRepository;
     private final ImmobilisationRepository immobilisationRepository;
-
+    private static final Logger logger = LoggerFactory.getLogger(CessionServiceImpl.class);
     public CessionServiceImpl(CessionRepository cessionRepository, ImmobilisationRepository immobilisationRepository) {
         this.cessionRepository = cessionRepository;
         this.immobilisationRepository = immobilisationRepository;
@@ -24,28 +26,44 @@ public class CessionServiceImpl implements CessionService {
 
     @Override
     public CessionDTO createCession(CessionDTO cessionDTO) {
+        logger.info("Création d'une cession pour l'immobilisation ID: {}", cessionDTO.getImmobilisationId());
+
+        // Vérifier si l'immobilisation existe
         Immobilisation immobilisation = immobilisationRepository.findById(cessionDTO.getImmobilisationId())
                 .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
 
+        // Vérifier si une cession existe déjà pour cette immobilisation
+        if (cessionRepository.existsByImmobilisationId(cessionDTO.getImmobilisationId())) {
+            throw new RuntimeException("Une cession existe déjà pour cette immobilisation.");
+        }
+
+        // Validation supplémentaire pour les cas spécifiques
         if (cessionDTO.getStatutCession() == StatutCession.VENDU && cessionDTO.getValeurCession() == null) {
             throw new RuntimeException("La valeur de cession est obligatoire pour une immobilisation vendue.");
         }
 
+        // Mettre à jour les informations de cession dans l'immobilisation
         immobilisation.setStatutCession(cessionDTO.getStatutCession());
-        immobilisation.setDateCession(cessionDTO.getDateCession());
+        immobilisation.setDateCession(cessionDTO.getDateCession()); // Date de sortie = Date de cession
         immobilisation.setValeurCession(cessionDTO.getValeurCession());
         immobilisationRepository.save(immobilisation);
 
+        // Créer une nouvelle cession
         Cession cession = new Cession();
         cession.setImmobilisation(immobilisation);
         cession.setStatutCession(cessionDTO.getStatutCession());
         cession.setDateCession(cessionDTO.getDateCession());
         cession.setValeurCession(cessionDTO.getValeurCession());
 
+        // Sauvegarder la cession
         Cession savedCession = cessionRepository.save(cession);
+
+        logger.info("Cession créée avec succès pour l'immobilisation ID: {}", cessionDTO.getImmobilisationId());
 
         return mapToDTO(savedCession);
     }
+
+
 
     @Override
     public CessionDTO updateCession(Long cessionId, CessionDTO cessionDTO) {
@@ -142,6 +160,8 @@ public class CessionServiceImpl implements CessionService {
         immobilisation.setValeurCession(null);
         immobilisationRepository.save(immobilisation);
     }
+
+
 
 
     private Cession getCession(Long id) {

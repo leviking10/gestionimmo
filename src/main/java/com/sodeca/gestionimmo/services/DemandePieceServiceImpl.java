@@ -2,11 +2,14 @@ package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.DemandePieceDTO;
 import com.sodeca.gestionimmo.entity.DemandePiece;
+import com.sodeca.gestionimmo.entity.MouvementStock;
 import com.sodeca.gestionimmo.entity.PieceDetachee;
 import com.sodeca.gestionimmo.entity.Personnel;
 import com.sodeca.gestionimmo.enums.StatutDemande;
+import com.sodeca.gestionimmo.enums.TypeMouvement;
 import com.sodeca.gestionimmo.mapper.DemandePieceMapper;
 import com.sodeca.gestionimmo.repository.DemandePieceRepository;
+import com.sodeca.gestionimmo.repository.MouvementStockRepository;
 import com.sodeca.gestionimmo.repository.PieceDetacheeRepository;
 import com.sodeca.gestionimmo.repository.PersonnelRepository;
 import org.springframework.stereotype.Service;
@@ -21,15 +24,17 @@ public class DemandePieceServiceImpl implements DemandePieceService {
     private final PieceDetacheeRepository pieceRepository;
     private final PersonnelRepository personnelRepository;
     private final DemandePieceMapper mapper;
+    private final MouvementStockRepository mouvementStockRepository;
 
     public DemandePieceServiceImpl(DemandePieceRepository demandeRepository,
                                    PieceDetacheeRepository pieceRepository,
                                    PersonnelRepository personnelRepository,
-                                   DemandePieceMapper mapper) {
+                                   DemandePieceMapper mapper, MouvementStockRepository mouvementStockRepository) {
         this.demandeRepository = demandeRepository;
         this.pieceRepository = pieceRepository;
         this.personnelRepository = personnelRepository;
         this.mapper = mapper;
+        this.mouvementStockRepository = mouvementStockRepository;
     }
 
     @Override
@@ -53,14 +58,52 @@ public class DemandePieceServiceImpl implements DemandePieceService {
     }
 
     @Override
+    public DemandePieceDTO rejeterDemande(Long id, String commentaire) {
+        // Récupération de la demande
+        DemandePiece demande = demandeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + id));
+
+        // Vérification du statut
+        if (demande.getStatut() == StatutDemande.APPROUVE) {
+            throw new RuntimeException("Impossible de rejeter une demande déjà validée.");
+        } else if (demande.getStatut() == StatutDemande.REJETE) {
+            throw new RuntimeException("Cette demande a déjà été rejetée.");
+        }
+
+        // Mise à jour du statut et ajout du commentaire
+        demande.setStatut(StatutDemande.REJETE);
+        demande.setCommentaire(commentaire);
+        demande.setDateAnnulation(LocalDateTime.now());
+
+        // Sauvegarde de la demande mise à jour
+        return mapper.toDTO(demandeRepository.save(demande));
+    }
+
+    @Override
+    public DemandePieceDTO livrerDemande(Long id) {
+        DemandePiece demande = demandeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + id));
+
+        // Vérification du statut actuel
+        if (demande.getStatut() != StatutDemande.APPROUVE) {
+            throw new RuntimeException("Seules les demandes approuvées peuvent être marquées comme livrées.");
+        }
+
+        // Mise à jour du statut
+        demande.setStatut(StatutDemande.LIVRE);
+        demande.setDateLivraison(LocalDateTime.now());
+        return mapper.toDTO(demandeRepository.save(demande));
+    }
+
+    @Override
     public DemandePieceDTO validerDemande(Long id) {
         DemandePiece demande = demandeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + id));
 
         // Vérification du statut
-        if (demande.getStatut() == StatutDemande.APPROUVEE) {
+        if (demande.getStatut() == StatutDemande.APPROUVE) {
             throw new RuntimeException("La demande est déjà validée.");
-        } else if (demande.getStatut() == StatutDemande.ANNULEE) {
+        } else if (demande.getStatut() == StatutDemande.ANNULE) {
             throw new RuntimeException("Impossible de valider une demande annulée.");
         }
 
@@ -74,8 +117,17 @@ public class DemandePieceServiceImpl implements DemandePieceService {
         piece.setStockDisponible(piece.getStockDisponible() - demande.getQuantiteDemandee());
         pieceRepository.save(piece);
 
+        // Enregistrement du mouvement de stock
+        MouvementStock mouvement = new MouvementStock();
+        mouvement.setPiece(piece);
+        mouvement.setQuantite(demande.getQuantiteDemandee());
+        mouvement.setTypeMouvement(TypeMouvement.SORTIE);
+        mouvement.setCommentaire("Validation de la demande ID: " + id);
+        mouvement.setDateMouvement(LocalDateTime.now());
+        mouvementStockRepository.save(mouvement);
+
         // Mise à jour du statut de la demande
-        demande.setStatut(StatutDemande.APPROUVEE);
+        demande.setStatut(StatutDemande.APPROUVE);
         demande.setDateValidation(LocalDateTime.now());
         demandeRepository.save(demande);
 
@@ -88,18 +140,34 @@ public class DemandePieceServiceImpl implements DemandePieceService {
                 .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + id));
 
         // Vérification du statut
-        if (demande.getStatut() == StatutDemande.APPROUVEE) {
+        if (demande.getStatut() == StatutDemande.APPROUVE) {
             throw new RuntimeException("Impossible d'annuler une demande déjà validée.");
-        } else if (demande.getStatut() == StatutDemande.ANNULEE) {
+        } else if (demande.getStatut() == StatutDemande.ANNULE) {
             throw new RuntimeException("Cette demande est déjà annulée.");
         }
 
-        // Annulation de la demande
-        demande.setStatut(StatutDemande.ANNULEE);
-        demande.setDateAnnulation(LocalDateTime.now());
+        // Si la demande a déjà modifié le stock, réintégration (optionnel)
+        PieceDetachee piece = demande.getPiece();
+        if (demande.getStatut() == StatutDemande.EN_ATTENTE) {
+            piece.setStockDisponible(piece.getStockDisponible() + demande.getQuantiteDemandee());
+            pieceRepository.save(piece);
 
+            // Enregistrement du mouvement de stock
+            MouvementStock mouvement = new MouvementStock();
+            mouvement.setPiece(piece);
+            mouvement.setQuantite(demande.getQuantiteDemandee());
+            mouvement.setTypeMouvement(TypeMouvement.ENTREE);
+            mouvement.setCommentaire("Annulation de la demande ID: " + id);
+            mouvement.setDateMouvement(LocalDateTime.now());
+            mouvementStockRepository.save(mouvement);
+        }
+
+        // Annulation de la demande
+        demande.setStatut(StatutDemande.ANNULE);
+        demande.setDateAnnulation(LocalDateTime.now());
         return mapper.toDTO(demandeRepository.save(demande));
     }
+
 
     @Override
     public List<DemandePieceDTO> getAllDemandes() {

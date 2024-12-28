@@ -68,7 +68,7 @@ public class Immobilisation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EtatImmobilisation etatImmo =EtatImmobilisation.EN_SERVICE;
+    private EtatImmobilisation etatImmo = EtatImmobilisation.EN_SERVICE;
 
     @CreationTimestamp
     private LocalDateTime createdDate;
