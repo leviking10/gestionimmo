@@ -2,12 +2,12 @@ package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.CategorieDTO;
 import com.sodeca.gestionimmo.entity.Categorie;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.CategorieMapper;
 import com.sodeca.gestionimmo.repository.CategorieRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CategorieServiceImpl implements CategorieService {
@@ -38,14 +38,14 @@ public class CategorieServiceImpl implements CategorieService {
         return categorieRepository.findAll()
                 .stream()
                 .map(mapper::toCategorieDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public CategorieDTO getCategorieById(Long id) {
         // Récupérer une catégorie par ID
         Categorie categorie = categorieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Catégorie introuvable"));
         return mapper.toCategorieDTO(categorie);
     }
 
@@ -54,7 +54,7 @@ public class CategorieServiceImpl implements CategorieService {
         // Convertir chaque DTO en entité
         List<Categorie> categories = categorieDTOs.stream()
                 .map(mapper::toCategorie)
-                .collect(Collectors.toList());
+                .toList();
 
         // Sauvegarder toutes les entités en une seule transaction
         List<Categorie> savedCategories = categorieRepository.saveAll(categories);
@@ -84,7 +84,7 @@ public class CategorieServiceImpl implements CategorieService {
     public void deleteCategorie(Long id) {
         // Vérifier si la catégorie existe
         if (!categorieRepository.existsById(id)) {
-            throw new RuntimeException("Catégorie introuvable avec l'ID : " + id);
+            throw new BusinessException("Catégorie introuvable avec l'ID : " + id);
         }
 
         // Supprimer la catégorie

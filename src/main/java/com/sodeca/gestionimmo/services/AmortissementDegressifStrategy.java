@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 @Service
 public class AmortissementDegressifStrategy implements AmortissementStrategy {
 
@@ -35,7 +34,6 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
                 .orElse(immobilisation.getDateMiseEnService().withDayOfYear(1));
 
         double montantCumule = dernierAmortissement.map(Amortissement::getMontantCumule).orElse(0.0);
-        double totalAmortissementCalcule = 0.0;
         boolean utiliserLineaire = false;
 
         for (int i = 0; i < dureeRestante; i++) {
@@ -64,33 +62,10 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
                         .coefficientDegressif(coefficient)
                         .tauxDegressif(tauxDegressif)
                         .dateDebutExercice(dateDebutExercice)
-                        .dateCalcul(dateDebutExercice.plusMonths(12 - immobilisation.getDateAcquisition().getMonthValue()))
+                        .dateCalcul(LocalDate.of(dateDebutExercice.getYear(), 12, 31))
                         .valeurNette(Math.max(valeurComptable, 0.0))
                         .statut(StatutAmmortissement.EN_COURS)
                         .build());
-
-                // Ligne complémentaire pour l'année
-                double montantComplement = montantAmortiDegressif - montantProrata;
-                valeurComptable -= montantComplement;
-                montantCumule += montantComplement;
-
-                logger.info("Complément après prorata : Montant complément = {}, Cumul = {}", montantComplement, montantCumule);
-
-                amortissements.add(Amortissement.builder()
-                        .immobilisation(immobilisation)
-                        .methode("Dégressif")
-                        .montantAmorti(montantComplement)
-                        .montantCumule(montantCumule)
-                        .coefficientDegressif(coefficient)
-                        .tauxDegressif(tauxDegressif)
-                        .dateDebutExercice(dateDebutExercice.plusMonths(12 - immobilisation.getDateAcquisition().getMonthValue()))
-                        .dateCalcul(dateDebutExercice.plusYears(1).minusDays(1))
-                        .valeurNette(Math.max(valeurComptable, 0.0))
-                        .statut(StatutAmmortissement.EN_COURS)
-                        .build());
-
-                dateDebutExercice = dateDebutExercice.plusYears(1);
-                continue;
             }
 
             // Année sans prorata ou après le prorata
@@ -107,13 +82,15 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
                     .montantCumule(montantCumule)
                     .coefficientDegressif(coefficient)
                     .tauxDegressif(utiliserLineaire ? null : tauxDegressif)
-                    .dateDebutExercice(dateDebutExercice.plusYears(i))
-                    .dateCalcul(dateDebutExercice.plusYears(i + 1).minusDays(1))
+                    .dateDebutExercice(dateDebutExercice)
+                    .dateCalcul(LocalDate.of(dateDebutExercice.getYear() + 1, 12, 31)) // Toujours 31 décembre
                     .valeurNette(Math.max(valeurComptable, 0.0))
                     .statut(i == dureeRestante - 1 ? StatutAmmortissement.AMORTI : StatutAmmortissement.EN_COURS)
                     .build());
-        }
 
+            // Mise à jour de la date de début d'exercice pour l'année suivante
+            dateDebutExercice = dateDebutExercice.plusYears(1).withDayOfYear(1);
+        }
 
         validateAmortissementTotal(immobilisation, montantCumule);
         return amortissements;
@@ -121,7 +98,7 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
 
     private double prorataCalculDegressif(Immobilisation immobilisation, double montantAnnuel) {
         int moisRestants = 12 - immobilisation.getDateAcquisition().getMonthValue() + 1;
-        if (moisRestants <= 0 || montantAnnuel <= 0) {
+        if (montantAnnuel <= 0) {
             throw new IllegalArgumentException("Mois restants ou montant annuel invalide pour le calcul du prorata.");
         }
         return (montantAnnuel * moisRestants) / 12;

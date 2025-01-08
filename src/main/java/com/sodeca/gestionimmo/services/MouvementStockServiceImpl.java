@@ -4,6 +4,7 @@ import com.sodeca.gestionimmo.dto.MouvementStockDTO;
 import com.sodeca.gestionimmo.entity.MouvementStock;
 import com.sodeca.gestionimmo.entity.PieceDetachee;
 import com.sodeca.gestionimmo.enums.TypeMouvement;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.MouvementStockMapper;
 import com.sodeca.gestionimmo.repository.MouvementStockRepository;
 import com.sodeca.gestionimmo.repository.PieceDetacheeRepository;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class MouvementStockServiceImpl implements MouvementStockService {
@@ -38,7 +38,7 @@ public class MouvementStockServiceImpl implements MouvementStockService {
     public List<MouvementStockDTO> searchMouvements(TypeMouvement type, LocalDateTime startDate, LocalDateTime endDate) {
         return mouvementRepository.findByTypeMouvementAndDateMouvementBetween(type, startDate, endDate).stream()
                 .map(mouvementMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -53,7 +53,7 @@ public class MouvementStockServiceImpl implements MouvementStockService {
             nouvelleQuantite += dto.getQuantite();
         } else if (dto.getTypeMouvement() == TypeMouvement.SORTIE) {
             if (piece.getStockDisponible() < dto.getQuantite()) {
-                throw new RuntimeException("Quantité insuffisante en stock pour la sortie.");
+                throw new BusinessException("Quantité insuffisante en stock pour la sortie.");
             }
             nouvelleQuantite -= dto.getQuantite();
         }
@@ -80,7 +80,7 @@ public class MouvementStockServiceImpl implements MouvementStockService {
                 .orElseThrow(() -> new RuntimeException("Pièce introuvable avec l'ID : " + pieceId));
         return mouvementRepository.findByPiece(piece).stream()
                 .map(mouvementMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -89,6 +89,6 @@ public class MouvementStockServiceImpl implements MouvementStockService {
                 .orElseThrow(() -> new RuntimeException("Pièce introuvable avec la référence : " + reference));
         return mouvementRepository.findByPiece(piece).stream()
                 .map(mouvementMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

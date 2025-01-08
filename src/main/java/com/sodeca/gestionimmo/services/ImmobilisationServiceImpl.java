@@ -1,16 +1,12 @@
 package com.sodeca.gestionimmo.services;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
 import com.sodeca.gestionimmo.entity.Categorie;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.*;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.ImmobilisationMapper;
 import com.sodeca.gestionimmo.repository.CategorieRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
@@ -18,15 +14,14 @@ import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 @Service
@@ -35,13 +30,15 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     private final ImmobilisationRepository immobilisationRepository;
     private final CategorieRepository categorieRepository;
     private final ImmobilisationMapper mapper;
+    private final QRCodeService qrCodeService;
     private static final Logger logger = LoggerFactory.getLogger(ImmobilisationServiceImpl.class);
     public ImmobilisationServiceImpl(ImmobilisationMapper mapper,
                                      ImmobilisationRepository immobilisationRepository,
-                                     CategorieRepository categorieRepository) {
+                                     CategorieRepository categorieRepository, QRCodeService qrCodeService) {
         this.mapper = mapper;
         this.immobilisationRepository = immobilisationRepository;
         this.categorieRepository = categorieRepository;
+        this.qrCodeService = qrCodeService;
     }
 
     @Override
@@ -62,152 +59,80 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
                 .map(mapper::toPolymorphicDTO);
     }
 
-    @Override
     public List<ImmobilisationDTO> createImmobilisations(List<ImmobilisationDTO> dtos) {
-        List<Immobilisation> immobilisations = dtos.stream().map(dto -> {
-            // Récupérer la catégorie par désignation
-            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
-                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
-
-            if (!categorie.isActif()) {
-                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
-            }
-
-            // Convertir le DTO en entité
-            Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
-            immobilisation.setCategorie(categorie);
-
-            if (dto.getAffectation() == null) {
-                dto.setAffectation(StatutAffectation.DISPONIBLE);
-            }
-            if (dto.getEtatImmobilisation() == null) {
-                dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
-            }
-             categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
-                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
-
-            // Vérifier si la catégorie est active
-            if (!categorie.isActif()) {
-                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
-            }
-            // Générer et assigner un QR Code
-            generateAndAssignQRCode(immobilisation);
-
-            return immobilisation;
-        }).toList();
-
-        // Sauvegarder toutes les immobilisations
-        List<Immobilisation> savedImmobilisations = immobilisationRepository.saveAll(immobilisations);
-
-        // Convertir en DTO et retourner
-        return savedImmobilisations.stream()
-                .map(mapper::toPolymorphicDTO)
+        List<Immobilisation> immobilisations = dtos.stream()
+                .map(this::convertToImmobilisation)
                 .toList();
+
+        List<Immobilisation> saved = immobilisationRepository.saveAll(immobilisations);
+        return saved.stream().map(mapper::toPolymorphicDTO).toList();
+    }
+
+    private Immobilisation convertToImmobilisation(ImmobilisationDTO dto) {
+        Categorie categorie = getValidatedCategorie(dto.getCategorieDesignation());
+        Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
+        immobilisation.setCategorie(categorie);
+        generateAndAssignQRCode(immobilisation);
+        return immobilisation;
+    }
+
+    private Categorie getValidatedCategorie(String designation) {
+        Categorie categorie = categorieRepository.findByCategorie(designation)
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable : " + designation));
+        if (!categorie.isActif()) {
+            throw new BusinessException("La catégorie sélectionnée est désactivée.");
+        }
+        return categorie;
     }
 
 
+
     private void generateAndAssignQRCode(Immobilisation immobilisation) {
-        try {
-            String qrCodeData = "https://gestionimmo.sodeca.com/immobilisation/" + immobilisation.getCodeImmo();
-            String qrCodeBase64 = generateQRCode(qrCodeData);
-            immobilisation.setQrCode(qrCodeBase64);
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la génération du QR Code", e);
-        }
+        String qrCodeData = "https://gestionimmo.sodeca.com/immobilisation/" + immobilisation.getCodeImmo();
+        immobilisation.setQrCode(qrCodeService.generateQRCode(qrCodeData));
     }
 
 
     @Override
     public ImmobilisationDTO createImmobilisation(ImmobilisationDTO dto) {
-        // Récupérer la catégorie par désignation
-        // Ajout des valeurs par défaut pour les champs obligatoires
-        if (dto.getAffectation() == null) {
-            dto.setAffectation(StatutAffectation.DISPONIBLE);
-        }
-        if (dto.getEtatImmobilisation() == null) {
-            dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
-        }
-
-        Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
-                .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
-
-        // Vérifier si la catégorie est active
-        if (!categorie.isActif()) {
-            throw new RuntimeException("La catégorie sélectionnée est désactivée.");
-        }
-
-        // Convertir le DTO en entité
+        // Vérification et mapping
+        Categorie categorie = getValidatedCategorie(dto.getCategorieDesignation());
         Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
+
+        // Paramètres par défaut
+        setDefaultValues(dto, immobilisation);
+
         immobilisation.setCategorie(categorie);
-        // Sauvegarder l'immobilisation dans la base de données
         immobilisation.setCodeImmo(generateUniqueCodeImmo());
-        immobilisation.setType(TypeImmobilisation.valueOf(dto.getType().name()));
-        immobilisation.setTypeAmortissement(TypeAmortissement.valueOf(dto.getTypeAmortissement().name()));
-        Immobilisation savedImmobilisation = immobilisationRepository.save(immobilisation);
         generateAndAssignQRCode(immobilisation);
-        immobilisationRepository.save(savedImmobilisation);
-                System.out.println("Type dans DTO : " + dto.getTypeAmortissement());
 
-
-        return mapper.toPolymorphicDTO(savedImmobilisation);
-
+        Immobilisation saved = immobilisationRepository.save(immobilisation);
+        return mapper.toPolymorphicDTO(saved);
     }
-
+    private void setDefaultValues(ImmobilisationDTO dto, Immobilisation immobilisation) {
+        immobilisation.setAffectation(dto.getAffectation() != null ? dto.getAffectation() : StatutAffectation.DISPONIBLE);
+        immobilisation.setEtatImmo(dto.getEtatImmo() != null ? dto.getEtatImmo() : EtatImmobilisation.EN_SERVICE);
+    }
     @Override
     @Transactional
     public ImmobilisationDTO updateImmobilisation(Long id, ImmobilisationDTO dto) {
-        // Récupérer l'immobilisation existante
-        Immobilisation ancienneImmobilisation = immobilisationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + id));
+        Immobilisation immobilisation = immobilisationRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Immobilisation introuvable  : "));
 
-        // Mise à jour des champs si non null dans le DTO
-        if (dto.getDesignation() != null) {
-            ancienneImmobilisation.setDesignation(dto.getDesignation());
-        }
+        // Mise à jour des champs
+        updateFields(immobilisation, dto);
+        Immobilisation updated = immobilisationRepository.save(immobilisation);
 
-        if (dto.getDateAcquisition() != null) {
-            ancienneImmobilisation.setDateAcquisition(dto.getDateAcquisition());
-        }
-
-        if (dto.getValeurAcquisition() != null) {
-            ancienneImmobilisation.setValeurAcquisition(dto.getValeurAcquisition());
-        }
-
-        if (dto.getLocalisation() != null) {
-            ancienneImmobilisation.setLocalisation(dto.getLocalisation());
-        }
-
-        if (dto.getDateMiseEnService() != null) {
-            ancienneImmobilisation.setDateMiseEnService(dto.getDateMiseEnService());
-        }
-
-        if (dto.getEtatImmobilisation() != null) {
-            ancienneImmobilisation.setEtatImmo(dto.getEtatImmobilisation());
-        }
-
-        if (dto.getAffectation() != null) {
-            ancienneImmobilisation.setStatut(dto.getAffectation());
-        }
-
-        if (dto.getTypeAmortissement() != null) {
-            ancienneImmobilisation.setTypeAmortissement(dto.getTypeAmortissement());
-        }
-
-        if (dto.getCategorieDesignation() != null) {
-            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
-                    .orElseThrow(() -> new RuntimeException("Catégorie introuvable avec la désignation : " + dto.getCategorieDesignation()));
-            if (!categorie.isActif()) {
-                throw new RuntimeException("La catégorie sélectionnée est désactivée.");
-            }
-            ancienneImmobilisation.setCategorie(categorie);
-        }
-
-        // Sauvegarder les modifications
-        Immobilisation updatedImmobilisation = immobilisationRepository.save(ancienneImmobilisation);
-
-        return mapper.toPolymorphicDTO(updatedImmobilisation);
+        return mapper.toPolymorphicDTO(updated);
     }
-
+    private void updateFields(Immobilisation immobilisation, ImmobilisationDTO dto) {
+        if (dto.getDesignation() != null) immobilisation.setDesignation(dto.getDesignation());
+        if (dto.getDateAcquisition() != null) immobilisation.setDateAcquisition(dto.getDateAcquisition());
+        if (dto.getValeurAcquisition() != null) immobilisation.setValeurAcquisition(dto.getValeurAcquisition());
+        if (dto.getLocalisation() != null) immobilisation.setLocalisation(dto.getLocalisation());
+        if (dto.getEtatImmo() != null) immobilisation.setEtatImmo(dto.getEtatImmo());
+        if (dto.getAffectation() != null) immobilisation.setAffectation(dto.getAffectation());
+    }
 
 
     @Override
@@ -221,7 +146,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
                 .orElseThrow(() -> new RuntimeException("Cette immobilisation n'existe pas"));
 
         if (immobilisation.getQrCode() == null || immobilisation.getQrCode().isEmpty()) {
-            throw new RuntimeException("QR Code non disponible pour cette immobilisation");
+            throw new BusinessException("QR Code non disponible pour cette immobilisation");
         }
 
         return Base64.getDecoder().decode(immobilisation.getQrCode());
@@ -230,10 +155,10 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     @Override
     public byte[] downloadQRCode(Long id) {
         Immobilisation immobilisation = immobilisationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Immobilisation introuvable "));
 
         if (immobilisation.getQrCode() == null || immobilisation.getQrCode().isEmpty()) {
-            throw new RuntimeException("Le QR Code pour cette immobilisation n'existe pas.");
+            throw new BusinessException("Le QR Code pour cette immobilisation n'existe pas.");
         }
 
         return Base64.getDecoder().decode(immobilisation.getQrCode());
@@ -242,7 +167,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     @Override
     public ImmobilisationDTO getImmobilisationByCode(String codeImmo) {
         Immobilisation immobilisation = immobilisationRepository.findByCodeImmo(codeImmo)
-                .orElseThrow(() -> new RuntimeException("Aucune immobilisation trouvée avec le code : " + codeImmo));
+                .orElseThrow(() -> new BusinessException("Aucune immobilisation trouvée avec le code : " + codeImmo));
         return mapper.toPolymorphicDTO(immobilisation);
     }
 
@@ -281,48 +206,56 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     @Override
     public void updateEtat(Long immobilisationId, EtatImmobilisation nouvelEtat) {
         Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + immobilisationId));
+                .orElseThrow(() -> new BusinessException("Immobilisation introuvable avec l'ID : " + immobilisationId));
 
         immobilisation.setEtatImmo(nouvelEtat);
         immobilisationRepository.save(immobilisation);
     }
-
-    private String generateQRCode(String text) throws Exception {
-        int width = 250;
-        int height = 250;
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-
-        Map<EncodeHintType, Object> hints = new HashMap<>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
-
-        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height, hints);
-
-        BufferedImage qrImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                qrImage.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
-            }
-        }
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(qrImage, "PNG", outputStream);
-        return Base64.getEncoder().encodeToString(outputStream.toByteArray());
-    }
-
-
     @Override
     public List<ImmobilisationDTO> importImmobilisationsFromFile(MultipartFile file) throws IOException {
-        String fileName = file.getOriginalFilename().toLowerCase();
+        validateFile(file);
+
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || fileName.trim().isEmpty()) {
+            throw new BusinessException("Le fichier doit avoir un nom valide.",
+                    "INVALID_FILE_NAME", HttpStatus.BAD_REQUEST);
+        }
+
+        fileName = fileName.toLowerCase();
 
         if (isExcelFile(fileName)) {
             return processExcelFile(file);
         } else if (isCsvFile(fileName)) {
             return processCsvFile(file);
         } else {
-            throw new RuntimeException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.");
+            throw new BusinessException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.",
+                    "UNSUPPORTED_FILE_FORMAT", HttpStatus.BAD_REQUEST);
         }
     }
 
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("Le fichier est vide ou non fourni.",
+                    "EMPTY_FILE", HttpStatus.BAD_REQUEST);
+        }
+
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || fileName.trim().isEmpty()) {
+            throw new BusinessException("Le fichier doit avoir un nom valide.",
+                    "INVALID_FILE_NAME", HttpStatus.BAD_REQUEST);
+        }
+
+        // Validation supplémentaire : vérifier les extensions autorisées
+        if (!isValidExtension(fileName)) {
+            throw new BusinessException("Extension de fichier non supportée. Veuillez uploader un fichier Excel ou CSV.",
+                    "INVALID_FILE_EXTENSION", HttpStatus.BAD_REQUEST);
+        }
+    }
+    private boolean isValidExtension(String fileName) {
+        String lowerCaseFileName = fileName.toLowerCase();
+        return lowerCaseFileName.endsWith(".xls") || lowerCaseFileName.endsWith(".xlsx") || lowerCaseFileName.endsWith(".csv");
+    }
     private boolean isExcelFile(String fileName) {
         return fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
     }
@@ -330,7 +263,6 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     private boolean isCsvFile(String fileName) {
         return fileName.endsWith(".csv");
     }
-
     private List<ImmobilisationDTO> processExcelFile(MultipartFile file) throws IOException {
         List<ImmobilisationDTO> immobilisations = new ArrayList<>();
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
@@ -341,69 +273,21 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
 
                 try {
                     ImmobilisationDTO dto = mapExcelRowToImmobilisationDTO(row);
-                    System.out.println("DTO mappé à partir du fichier : " + dto); // Log du DTO
                     if (isValidImmobilisation(dto)) {
                         immobilisations.add(dto);
                     } else {
-                        System.out.println("DTO invalide à la ligne " + (row.getRowNum() + 1) + ": " + dto);
+                        logger.warn("DTO invalide à la ligne {} : {}", row.getRowNum() + 1, dto);
                     }
                 } catch (Exception e) {
-                    System.err.println("Erreur lors du traitement de la ligne " + (row.getRowNum() + 1) + ": " + e.getMessage());
+                    logger.error("Erreur lors du traitement de la ligne {} : {}", row.getRowNum() + 1, e.getMessage());
                 }
             }
         }
         return saveImportedImmobilisations(immobilisations);
     }
-
-
-    private ImmobilisationDTO mapExcelRowToImmobilisationDTO(Row row) {
-        try {
-            ImmobilisationDTO dto = new ImmobilisationDTO();
-            dto.setDesignation(getCellValue(row.getCell(0)).trim());
-            dto.setCategorieDesignation(getCellValue(row.getCell(1)).trim());
-
-            // Gestion de la date d'acquisition
-            dto.setDateAcquisition(getCellDateValue(row.getCell(2)));
-
-            // Gestion de la valeur d'acquisition
-            dto.setValeurAcquisition(parseDouble(getCellValue(row.getCell(3))));
-
-            dto.setLocalisation(getCellValue(row.getCell(4)).trim());
-
-            // Gestion de la date de mise en service (peut être null)
-            dto.setDateMiseEnService(getCellDateValue(row.getCell(5)));
-
-            // Gestion du type d'immobilisation
-            String typeImmobilisation = getCellValue(row.getCell(6)).trim().toUpperCase();
-            dto.setType(TypeImmobilisation.valueOf(typeImmobilisation));
-
-            // Gestion du type d'amortissement
-            String typeAmortissement = getCellValue(row.getCell(7)).trim().toUpperCase().replace("É", "E").replace("È", "E");
-            dto.setTypeAmortissement(TypeAmortissement.valueOf(typeAmortissement));
-
-            // Champs par défaut
-            dto.setAffectation(StatutAffectation.DISPONIBLE);
-            dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE);
-
-            return dto;
-        } catch (Exception e) {
-            System.err.println("Erreur lors du mappage de la ligne " + row.getRowNum() + ": " + e.getMessage());
-            e.printStackTrace(); // Ajout du stack trace pour faciliter le débogage
-            throw new RuntimeException("Erreur lors du mappage de la ligne " + row.getRowNum(), e);
-        }
-    }
-
-    // Méthode pour convertir une valeur en double avec gestion des erreurs
-    private double parseDouble(String value) {
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Valeur invalide pour un nombre: " + value, e);
-        }
-    }
-
     private List<ImmobilisationDTO> processCsvFile(MultipartFile file) throws IOException {
         List<ImmobilisationDTO> immobilisations = new ArrayList<>();
+
         try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
             String[] values;
             boolean isHeader = true;
@@ -414,66 +298,144 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
                     continue;
                 }
 
-                try {
-                    ImmobilisationDTO dto = mapCsvRowToImmobilisationDTO(values);
-                    System.out.println("DTO mappé à partir du fichier CSV : " + dto); // Log du DTO
-                    if (isValidImmobilisation(dto)) {
-                        immobilisations.add(dto);
-                    } else {
-                        System.out.println("DTO invalide pour la ligne CSV : " + Arrays.toString(values));
-                    }
-                } catch (Exception e) {
-                    System.err.println("Erreur lors du traitement de la ligne CSV: " + Arrays.toString(values) + " - " + e.getMessage());
-                }
+                processCsvRow(values, immobilisations);
             }
         } catch (CsvValidationException e) {
-            throw new RuntimeException("Erreur de validation dans le fichier CSV.", e);
+            throw new BusinessException("Erreur de validation dans le fichier CSV.", "CSV_VALIDATION_ERROR", HttpStatus.BAD_REQUEST, e);
+        } catch (IOException e) {
+            throw new BusinessException("Erreur de lecture du fichier CSV.", "CSV_IO_ERROR", HttpStatus.BAD_REQUEST, e);
         }
 
         return saveImportedImmobilisations(immobilisations);
     }
-    private ImmobilisationDTO mapCsvRowToImmobilisationDTO(String[] values) {
+
+    private void processCsvRow(String[] values, List<ImmobilisationDTO> immobilisations) {
         try {
-            ImmobilisationDTO dto = new ImmobilisationDTO();
-            dto.setDesignation(values[0].trim());
-            dto.setCategorieDesignation(values[1].trim());
-
-            // Conversion de la date d'acquisition
-            dto.setDateAcquisition(parseDate(values[2].trim())); // Utilise parseDate pour gérer le format "dd/MM/yyyy"
-
-            dto.setValeurAcquisition(Double.parseDouble(values[3].trim()));
-            dto.setLocalisation(values[4].trim());
-
-            // Conversion de la date de mise en service (peut être null)
-            if (values[5] != null && !values[5].trim().isEmpty()) {
-                dto.setDateMiseEnService(parseDate(values[5].trim()));
+            ImmobilisationDTO dto = mapCsvRowToImmobilisationDTO(values);
+            if (isValidImmobilisation(dto)) {
+                immobilisations.add(dto);
+            } else {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("DTO invalide pour la ligne CSV : {}", Arrays.toString(values));
+                }
             }
-
-            // Conversion sans accents pour TypeImmobilisation
-            String typeImmobilisation = values[6].trim().toUpperCase().replace("É", "E").replace("È", "E");
-            dto.setType(TypeImmobilisation.valueOf(typeImmobilisation));
-
-            // Conversion sans accents pour TypeAmortissement
-            String typeAmortissement = values[7].trim().toUpperCase().replace("É", "E").replace("È", "E");
-            dto.setTypeAmortissement(TypeAmortissement.valueOf(typeAmortissement));
-
-            // Ajout des champs `statut` et `etatImmo`
-            dto.setAffectation(StatutAffectation.DISPONIBLE); // Par défaut
-            dto.setEtatImmobilisation(EtatImmobilisation.EN_SERVICE); // Par défaut
-
-            return dto;
+        } catch (BusinessException e) {
+            logger.error("Erreur métier lors du traitement de la ligne CSV : {} - {}", Arrays.toString(values), e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("Erreur lors du mappage des données CSV: " + Arrays.toString(values), e);
+            logger.error("Erreur inattendue lors du traitement de la ligne CSV : {} - {}", Arrays.toString(values), e.getMessage());
         }
     }
 
 
+    private ImmobilisationDTO mapExcelRowToImmobilisationDTO(Row row) {
+        try {
+            validateExcelRow(row);
 
+            ImmobilisationDTO dto = new ImmobilisationDTO();
+            dto.setDesignation(getCellValue(row.getCell(0)).trim());
+            dto.setCategorieDesignation(getCellValue(row.getCell(1)).trim());
+            dto.setDateAcquisition(parseCellDate(row.getCell(2)).toLocalDate());
+            dto.setValeurAcquisition(parseDouble(getCellValue(row.getCell(3))));
+            dto.setLocalisation(getCellValue(row.getCell(4)).trim());
+            // Gestion sécurisée de la date de mise en service
+            LocalDateTime optionalDate = parseOptionalCellDate(row.getCell(5));
+            dto.setDateMiseEnService(optionalDate != null ? optionalDate.toLocalDate() : null);
+
+            dto.setType(parseEnum(getCellValue(row.getCell(6)), TypeImmobilisation.class));
+            dto.setTypeAmortissement(parseEnum(getCellValue(row.getCell(7)), TypeAmortissement.class));
+
+            // Champs par défaut
+            dto.setAffectation(StatutAffectation.DISPONIBLE);
+            dto.setEtatImmo(EtatImmobilisation.EN_SERVICE);
+
+            return dto;
+        } catch (Exception e) {
+            throw new BusinessException("Erreur lors du mappage de la ligne Excel.", "EXCEL_ROW_MAPPING_ERROR", HttpStatus.BAD_REQUEST, e);
+        }
+    }
+
+
+    private void validateExcelRow(Row row) {
+        if (row == null) {
+            throw new BusinessException("La ligne Excel est nulle.", "EXCEL_ROW_NULL", HttpStatus.BAD_REQUEST);
+        }
+
+        int expectedColumns = 8;
+        if (row.getLastCellNum() < expectedColumns) {
+            throw new BusinessException("La ligne Excel contient moins de colonnes que prévu.", "EXCEL_ROW_INCOMPLETE", HttpStatus.BAD_REQUEST);
+        }
+    }
+    private LocalDateTime parseCellDate(Cell cell) {
+        if (cell == null || cell.getCellType() != CellType.NUMERIC || !DateUtil.isCellDateFormatted(cell)) {
+            throw new BusinessException("La cellule ne contient pas une date valide.", "EXCEL_DATE_FORMAT_ERROR", HttpStatus.BAD_REQUEST);
+        }
+        return cell.getLocalDateTimeCellValue();
+    }
+
+    private LocalDateTime parseOptionalCellDate(Cell cell) {
+        return (cell == null || cell.getCellType() == CellType.BLANK) ? null : parseCellDate(cell);
+    }
+
+    // Méthode pour convertir une valeur en double avec gestion des erreurs
+
+    private double parseDouble(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            throw new BusinessException("Valeur numérique invalide: " + value, "NUMBER_FORMAT_ERROR", HttpStatus.BAD_REQUEST, e);
+        }
+    }
+    private static final StatutAffectation DEFAULT_STATUT_AFFECTATION = StatutAffectation.DISPONIBLE;
+    private static final EtatImmobilisation DEFAULT_ETAT_IMMO = EtatImmobilisation.EN_SERVICE;
+
+    private ImmobilisationDTO mapCsvRowToImmobilisationDTO(String[] values) {
+        try {
+            validateCsvValues(values);
+
+            ImmobilisationDTO dto = new ImmobilisationDTO();
+            dto.setDesignation(values[0].trim());
+            dto.setCategorieDesignation(values[1].trim());
+            dto.setDateAcquisition(parseDate(values[2].trim()));
+            dto.setValeurAcquisition(parseDouble(values[3].trim()));
+            dto.setLocalisation(values[4].trim());
+            dto.setDateMiseEnService(parseOptionalDate(values[5]));
+            dto.setType(parseEnum(values[6], TypeImmobilisation.class));
+            dto.setTypeAmortissement(parseEnum(values[7], TypeAmortissement.class));
+
+            dto.setAffectation(DEFAULT_STATUT_AFFECTATION);
+            dto.setEtatImmo(DEFAULT_ETAT_IMMO);
+
+            return dto;
+        } catch (Exception e) {
+            throw new BusinessException("Erreur lors du mappage des données CSV: " + Arrays.toString(values), "CSV_MAPPING_ERROR", HttpStatus.BAD_REQUEST, e);
+        }
+    }
+    private void validateCsvValues(String[] values) {
+        if (values == null || values.length < 8) {
+            throw new BusinessException("Les données CSV sont incomplètes ou nulles.");
+        }
+    }
+    private LocalDate parseOptionalDate(String dateStr) {
+        return (dateStr == null || dateStr.trim().isEmpty()) ? null : parseDate(dateStr.trim());
+    }
+    private <T extends Enum<T>> T parseEnum(String value, Class<T> enumType) {
+        try {
+            return Enum.valueOf(enumType, normalizeString(value));
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("Valeur d'enum invalide: " + value, "ENUM_CONVERSION_ERROR", HttpStatus.BAD_REQUEST, e);
+        }
+    }
+    private String normalizeString(String value) {
+        return value.trim().toUpperCase()
+                .replace("É", "E")
+                .replace("È", "E")
+                .replace("À", "A")
+                .replace("Ù", "U");
+    }
     private List<ImmobilisationDTO> saveImportedImmobilisations(List<ImmobilisationDTO> dtos) {
         List<Immobilisation> immobilisations = dtos.stream().map(dto -> {
             Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
                     .orElseThrow(() -> new RuntimeException("Catégorie introuvable : " + dto.getCategorieDesignation()));
-
             Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
             immobilisation.setCategorie(categorie);
             immobilisation.setCodeImmo(generateUniqueCodeImmo());
@@ -498,34 +460,6 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
         };
     }
 
-    private LocalDate getCellDateValue(Cell cell) {
-        if (cell == null) {
-            logger.warn("Cellule vide ou date manquante.");
-            return null;
-        }
-
-        try {
-            if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-                // Si la cellule contient une date Excel formatée
-                LocalDate date = cell.getLocalDateTimeCellValue().toLocalDate();
-                logger.info("Date extraite (format Excel) : {}", date);
-                return date;
-            } else if (cell.getCellType() == CellType.STRING) {
-                // Si la cellule contient une date au format texte
-                String cellValue = cell.getStringCellValue().trim();
-                logger.info("Date au format texte détectée : {}", cellValue);
-                return parseDate(cellValue);
-            } else {
-                logger.warn("Type de cellule inattendu pour une date.");
-            }
-        } catch (Exception e) {
-            logger.error("Erreur lors de la conversion de la date : {}", e.getMessage());
-        }
-
-        return null;
-    }
-
-
     private LocalDate parseDate(String date) {
         if (date == null || date.isEmpty()) {
             return null;
@@ -538,11 +472,9 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
             return parsedDate;
         } catch (Exception e) {
             logger.error("Erreur lors de l'analyse de la date : {}. Attendu au format jj/MM/yyyy.", date);
-            throw new RuntimeException("Format de date invalide : " + date + ". Attendu : jj/MM/yyyy");
+            throw new BusinessException("Format de date invalide : " + date + ". Attendu : jj/MM/yyyy");
         }
     }
-
-
     private boolean isValidImmobilisation(ImmobilisationDTO dto) {
         return dto.getDesignation() != null && !dto.getDesignation().isEmpty()
                 && dto.getCategorieDesignation() != null && !dto.getCategorieDesignation().isEmpty()
@@ -551,6 +483,5 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
                 && dto.getType() != null
                 && dto.getTypeAmortissement() != null;
     }
-
 }
 

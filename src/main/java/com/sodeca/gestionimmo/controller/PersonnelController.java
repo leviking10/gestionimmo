@@ -1,7 +1,6 @@
 package com.sodeca.gestionimmo.controller;
-
-import com.sodeca.gestionimmo.dto.CategorieDTO;
 import com.sodeca.gestionimmo.dto.PersonnelDTO;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.services.PersonnelService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ public class PersonnelController {
     public PersonnelController(PersonnelService personnelService) {
         this.personnelService = personnelService;
     }
-
+private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PersonnelController.class);
     // **********************************
     // GESTION DU PERSONNEL
     // **********************************
@@ -134,15 +133,22 @@ public class PersonnelController {
     }
     @PutMapping("/activationmultiple")
     public ResponseEntity<String> activationForMultiple(@RequestBody List<Long> ids) {
-        System.out.println("IDs reçus pour activation multiple : " + ids); // Debug log
         try {
+            // Appel au service pour activer les statuts des personnels
             personnelService.activationForMultiple(ids);
             return ResponseEntity.ok("Les statuts des personnels ont été mis à jour avec succès.");
+        } catch (BusinessException ex) {
+            // Gestion des erreurs métier spécifiques
+            logger.warn("Erreur métier lors de l'activation multiple pour les IDs : {}", ids, ex);
+            return ResponseEntity.status(ex.getStatus()).body(ex.getMessage());
         } catch (RuntimeException ex) {
-            ex.printStackTrace(); // Log complet de l'erreur pour debug
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la mise à jour des statuts.");
+            // Gestion des erreurs inattendues
+            logger.error("Erreur inattendue lors de l'activation multiple pour les IDs : {}", ids, ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur inattendue s'est produite.");
         }
     }
+
+
 
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<List<PersonnelDTO>> uploadFile(@RequestParam("file") MultipartFile file) {

@@ -1,6 +1,24 @@
 spring:
   application:
-    name: gestionimmo   # Nom du microservice, utilisé par le config-service pour récupérer les configurations spécifiques
+    name: gestionimmo  # Nom du microservice, utilisé par le Config-Service pour récupérer les configurations spécifiques
 
   config:
     import: configserver:http://localhost:9999  # URL obligatoire du Config-Service
+
+logging:
+  level:
+    root: INFO
+    com.sodeca.gestionimmo: DEBUG  # Niveau de log pour le package spécifique
+  file:
+    name: logs/application.log  # Fichier log principal
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    loggers:
+      enabled: true

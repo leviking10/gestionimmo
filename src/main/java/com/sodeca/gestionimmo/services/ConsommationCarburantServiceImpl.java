@@ -56,7 +56,7 @@ public class ConsommationCarburantServiceImpl implements ConsommationCarburantSe
 
         List<ConsommationCarburant> consommations = repository.findByVehiculeIdAndDateBetween(vehiculeId, start, end);
         double totalLitres = consommations.stream().mapToDouble(ConsommationCarburant::getQuantiteLitres).sum();
-        double totalKilometrage = consommations.stream().mapToDouble(ConsommationCarburant::getKilométrage).sum();
+        double totalKilometrage = consommations.stream().mapToDouble(ConsommationCarburant::getKilometrage).sum();
         return totalKilometrage > 0 ? (totalLitres / totalKilometrage) * 100 : 0.0;
     }
 

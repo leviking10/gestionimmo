@@ -7,6 +7,7 @@ import com.sodeca.gestionimmo.entity.PieceDetachee;
 import com.sodeca.gestionimmo.entity.Personnel;
 import com.sodeca.gestionimmo.enums.StatutDemande;
 import com.sodeca.gestionimmo.enums.TypeMouvement;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.DemandePieceMapper;
 import com.sodeca.gestionimmo.repository.DemandePieceRepository;
 import com.sodeca.gestionimmo.repository.MouvementStockRepository;
@@ -61,13 +62,13 @@ public class DemandePieceServiceImpl implements DemandePieceService {
     public DemandePieceDTO rejeterDemande(Long id, String commentaire) {
         // Récupération de la demande
         DemandePiece demande = demandeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Demande introuvable  l'ID : " + id));
 
         // Vérification du statut
         if (demande.getStatut() == StatutDemande.APPROUVE) {
-            throw new RuntimeException("Impossible de rejeter une demande déjà validée.");
+            throw new BusinessException("Impossible de rejeter une demande déjà validée.");
         } else if (demande.getStatut() == StatutDemande.REJETE) {
-            throw new RuntimeException("Cette demande a déjà été rejetée.");
+            throw new BusinessException("Cette demande a déjà été rejetée.");
         }
 
         // Mise à jour du statut et ajout du commentaire
@@ -82,11 +83,11 @@ public class DemandePieceServiceImpl implements DemandePieceService {
     @Override
     public DemandePieceDTO livrerDemande(Long id) {
         DemandePiece demande = demandeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Demande introuvable "));
 
         // Vérification du statut actuel
         if (demande.getStatut() != StatutDemande.APPROUVE) {
-            throw new RuntimeException("Seules les demandes approuvées peuvent être marquées comme livrées.");
+            throw new BusinessException("Seules les demandes approuvées peuvent être marquées comme livrées.");
         }
 
         // Mise à jour du statut
@@ -102,15 +103,15 @@ public class DemandePieceServiceImpl implements DemandePieceService {
 
         // Vérification du statut
         if (demande.getStatut() == StatutDemande.APPROUVE) {
-            throw new RuntimeException("La demande est déjà validée.");
+            throw new BusinessException("La demande est déjà validée.");
         } else if (demande.getStatut() == StatutDemande.ANNULE) {
-            throw new RuntimeException("Impossible de valider une demande annulée.");
+            throw new BusinessException("Impossible de valider une demande annulée.");
         }
 
         // Vérification du stock
         PieceDetachee piece = demande.getPiece();
         if (piece.getStockDisponible() < demande.getQuantiteDemandee()) {
-            throw new RuntimeException("Stock insuffisant pour valider la demande.");
+            throw new BusinessException("Stock insuffisant pour valider la demande.");
         }
 
         // Mise à jour du stock
@@ -141,9 +142,9 @@ public class DemandePieceServiceImpl implements DemandePieceService {
 
         // Vérification du statut
         if (demande.getStatut() == StatutDemande.APPROUVE) {
-            throw new RuntimeException("Impossible d'annuler une demande déjà validée.");
+            throw new BusinessException("Impossible d'annuler une demande déjà validée.");
         } else if (demande.getStatut() == StatutDemande.ANNULE) {
-            throw new RuntimeException("Cette demande est déjà annulée.");
+            throw new BusinessException("Cette demande est déjà annulée.");
         }
 
         // Si la demande a déjà modifié le stock, réintégration (optionnel)

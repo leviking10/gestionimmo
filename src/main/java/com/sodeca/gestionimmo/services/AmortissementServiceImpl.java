@@ -7,11 +7,13 @@ import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
 import com.sodeca.gestionimmo.enums.StatutCession;
 import com.sodeca.gestionimmo.enums.TypeAmortissement;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.AmortissementMapper;
 import com.sodeca.gestionimmo.repository.AmortissementRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -63,7 +65,7 @@ public class AmortissementServiceImpl implements AmortissementService {
         Optional<Amortissement> dernierAmortissement = getDernierAmortissement(immobilisationId);
 
         if (dernierAmortissement.isPresent() && dernierAmortissement.get().getStatut() == StatutAmmortissement.AMORTI) {
-            throw new RuntimeException("L'immobilisation est déjà entièrement amortie.");
+            throw new BusinessException("L'immobilisation est déjà entièrement amortie.");
         }
 
         List<Amortissement> amortissements;
@@ -79,7 +81,7 @@ public class AmortissementServiceImpl implements AmortissementService {
             amortissements.forEach(amortissement -> amortissement.setTauxAnnuel(null));
         }
         else {
-            throw new RuntimeException("Méthode d'amortissement non supportée : " + methode);
+            throw new BusinessException("Méthode d'amortissement non supportée : " + methode);
         }
         amortissementRepository.saveAll(amortissements);
 
@@ -93,7 +95,7 @@ public class AmortissementServiceImpl implements AmortissementService {
     public void deleteAmortissement(int id) {
         logger.info("Deleting amortissement with ID: {}", id);
         if (!amortissementRepository.existsById(id)) {
-            throw new RuntimeException("Amortissement introuvable avec l'ID : " + id);
+            throw new BusinessException("Amortissement introuvable avec l'ID : " + id);
         }
         amortissementRepository.deleteById(id);
     }
@@ -105,7 +107,7 @@ public class AmortissementServiceImpl implements AmortissementService {
                 .orElseThrow(() -> new RuntimeException("Amortissement introuvable avec l'ID : " + id));
 
         if (amortissement.getStatut() == StatutAmmortissement.AMORTI) {
-            throw new RuntimeException("Impossible d'annuler un amortissement déjà complet.");
+            throw new BusinessException("Impossible d'annuler un amortissement déjà complet.");
         }
 
         amortissement.setStatut(StatutAmmortissement.ANNULE);
@@ -155,7 +157,6 @@ public class AmortissementServiceImpl implements AmortissementService {
         } else {
             statut = "EN_COURS";
         }
-
         // Créer et retourner le DTO
         return SituationAmortissementDTO.builder()
                 .amortissements(amortissementMapper.toDTOList(amortissements))
@@ -167,12 +168,18 @@ public class AmortissementServiceImpl implements AmortissementService {
 
     @Override
     public List<AmortissementDTO> getAllAmortissements() {
-        return null;
+        return amortissementRepository.findAll().stream().map(amortissementMapper::toDTO).toList();
     }
 
     @Override
     public List<AmortissementDTO> getFilteredAmortissements(String categorie, String methode, String etat, String periode) {
-        return null;
+        return amortissementRepository.findAll().stream()
+                .filter(amortissement -> categorie == null || amortissement.getImmobilisation().getCategorie().getCategorie().equalsIgnoreCase(categorie))
+                .filter(amortissement -> methode == null || amortissement.getImmobilisation().getTypeAmortissement().toString().equalsIgnoreCase(methode))
+                .filter(amortissement -> etat == null || amortissement.getStatut().toString().equalsIgnoreCase(etat))
+                .filter(amortissement -> periode == null || amortissement.getDateCalcul().toString().contains(periode))
+                .map(amortissementMapper::toDTO)
+                .toList();
     }
 
     private Optional<Amortissement> getDernierAmortissement(Long immobilisationId) {
@@ -185,12 +192,14 @@ public class AmortissementServiceImpl implements AmortissementService {
     private void validateTypeAmortissement(Immobilisation immobilisation, String methode) {
         // Vérification de la validité du paramètre "methode"
         if (methode == null || methode.trim().isEmpty()) {
-            throw new RuntimeException("La méthode d'amortissement fournie est nulle ou vide.");
+            throw new BusinessException("La méthode d'amortissement fournie est nulle ou vide.",
+                    "INVALID_AMORTISSEMENT_METHOD", HttpStatus.BAD_REQUEST);
         }
 
         // Vérification de la présence du type d'amortissement dans l'immobilisation
         if (immobilisation.getTypeAmortissement() == null) {
-            throw new RuntimeException("Le type d'amortissement est manquant pour l'immobilisation.");
+            throw new BusinessException("Le type d'amortissement est manquant pour l'immobilisation.",
+                    "MISSING_AMORTISSEMENT_TYPE", HttpStatus.BAD_REQUEST);
         }
 
         // Conversion robuste du type d'amortissement
@@ -198,14 +207,17 @@ public class AmortissementServiceImpl implements AmortissementService {
         try {
             typeAmortissement = TypeAmortissement.fromLabelOrName(immobilisation.getTypeAmortissement().toString());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Type d'amortissement invalide : " + immobilisation.getTypeAmortissement(), e);
+            throw new BusinessException("Type d'amortissement invalide : " + immobilisation.getTypeAmortissement(),
+                    "INVALID_AMORTISSEMENT_TYPE", HttpStatus.BAD_REQUEST, e);
         }
 
         // Validation de la correspondance entre le type et la méthode
         if (!typeAmortissement.getLabel().equalsIgnoreCase(methode)) {
-            throw new RuntimeException("La méthode d'amortissement (" + methode + ") ne correspond pas au type défini pour l'immobilisation (" + typeAmortissement.getLabel() + ").");
+            throw new BusinessException("La méthode d'amortissement (" + methode + ") ne correspond pas au type défini pour l'immobilisation (" + typeAmortissement.getLabel() + ").",
+                    "AMORTISSEMENT_METHOD_MISMATCH", HttpStatus.BAD_REQUEST);
         }
     }
+
 
 
 

@@ -4,6 +4,7 @@ import com.sodeca.gestionimmo.dto.CessionDTO;
 import com.sodeca.gestionimmo.entity.Cession;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.enums.StatutCession;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.repository.CessionRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
 import org.slf4j.Logger;
@@ -34,12 +35,12 @@ public class CessionServiceImpl implements CessionService {
 
         // Vérifier si une cession existe déjà pour cette immobilisation
         if (cessionRepository.existsByImmobilisationId(cessionDTO.getImmobilisationId())) {
-            throw new RuntimeException("Une cession existe déjà pour cette immobilisation.");
+            throw new BusinessException("Une cession existe déjà pour cette immobilisation.");
         }
 
         // Validation supplémentaire pour les cas spécifiques
         if (cessionDTO.getStatutCession() == StatutCession.VENDU && cessionDTO.getValeurCession() == null) {
-            throw new RuntimeException("La valeur de cession est obligatoire pour une immobilisation vendue.");
+            throw new BusinessException("La valeur de cession est obligatoire pour une immobilisation vendue.");
         }
 
         // Mettre à jour les informations de cession dans l'immobilisation
@@ -71,7 +72,7 @@ public class CessionServiceImpl implements CessionService {
                 .orElseThrow(() -> new RuntimeException("Cession introuvable"));
 
         if (cessionDTO.getStatutCession() == StatutCession.VENDU && cessionDTO.getValeurCession() == null) {
-            throw new RuntimeException("La valeur de cession est obligatoire pour une immobilisation vendue.");
+            throw new BusinessException("La valeur de cession est obligatoire pour une immobilisation vendue.");
         }
 
         cession.setStatutCession(cessionDTO.getStatutCession());
@@ -152,7 +153,7 @@ public class CessionServiceImpl implements CessionService {
                 .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
 
         if (immobilisation.getStatutCession() == StatutCession.DISPONIBLE) {
-            throw new RuntimeException("Cette immobilisation n'a pas de cession enregistrée.");
+            throw new BusinessException("Cette immobilisation n'a pas de cession enregistrée.");
         }
 
         immobilisation.setStatutCession(StatutCession.DISPONIBLE);

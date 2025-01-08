@@ -3,6 +3,7 @@ package com.sodeca.gestionimmo.controller;
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
 import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
 import com.sodeca.gestionimmo.entity.Immobilisation;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
 import com.sodeca.gestionimmo.services.AmortissementService;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ private final Logger logger = LoggerFactory.getLogger(AmortissementController.cl
                     : null;
 
             if (methode == null) {
-                throw new RuntimeException("La méthode d'amortissement n'est pas définie pour cette immobilisation.");
+                throw new BusinessException("La méthode d'amortissement n'est pas définie pour cette immobilisation.");
             }
 
             List<AmortissementDTO> amortissements = amortissementService.generateAmortissementsForImmobilisation(immobilisationId, methode);

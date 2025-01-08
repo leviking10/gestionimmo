@@ -29,7 +29,7 @@ public class ImmobilisationDTO {
     private String qrCode;
     private LocalDate dateMiseEnService;
     private int dureeAmortissement;
-    private EtatImmobilisation etatImmobilisation;
+    private EtatImmobilisation etatImmo;
     private StatutAffectation affectation;
     @NotNull(message = "Le type d'immobilisation est obligatoire")
     private TypeImmobilisation type;

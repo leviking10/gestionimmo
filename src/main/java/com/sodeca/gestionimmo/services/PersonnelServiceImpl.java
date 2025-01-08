@@ -2,6 +2,7 @@ package com.sodeca.gestionimmo.services;
 import com.opencsv.exceptions.CsvValidationException;
 import com.sodeca.gestionimmo.dto.PersonnelDTO;
 import com.sodeca.gestionimmo.entity.Personnel;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.PersonnelMapper;
 import com.sodeca.gestionimmo.repository.PersonnelRepository;
 import org.apache.poi.ss.usermodel.*;
@@ -28,7 +29,7 @@ public class PersonnelServiceImpl implements PersonnelService {
     @Override
     public PersonnelDTO createPersonnel(PersonnelDTO personnelDTO) {
         if (personnelRepository.existsByMatricule(personnelDTO.getMatricule())) {
-            throw new RuntimeException("Un personnel avec ce matricule existe déjà.");
+            throw new BusinessException("Un personnel avec ce matricule existe déjà.");
         }
         Personnel personnel = personnelMapper.toEntity(personnelDTO);
         Personnel savedPersonnel = personnelRepository.save(personnel);
@@ -40,7 +41,7 @@ public class PersonnelServiceImpl implements PersonnelService {
         List<Personnel> personnels = personnelRepository.findAllById(ids);
 
         if (personnels.isEmpty()) {
-            throw new RuntimeException("Aucun personnel trouvé pour les IDs fournis.");
+            throw new BusinessException("Aucun personnel trouvé pour les IDs fournis.");
         }
 
         // Bascule du statut actif/inactif pour chaque personnel
@@ -72,7 +73,7 @@ public class PersonnelServiceImpl implements PersonnelService {
     @Override
     public void deletePersonnel(Long personnelId) {
         if (!personnelRepository.existsById(personnelId)) {
-            throw new RuntimeException("Cette personne introuvable avec l'ID : " + personnelId);
+            throw new BusinessException("Cette personne introuvable avec l'ID : " + personnelId);
         }
         personnelRepository.deleteById(personnelId);
     }
@@ -135,7 +136,7 @@ public class PersonnelServiceImpl implements PersonnelService {
         } else if (isCsvFile(fileName)) {
             return processCsvFile(file);
         } else {
-            throw new RuntimeException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.");
+            throw new BusinessException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.");
         }
     }
 

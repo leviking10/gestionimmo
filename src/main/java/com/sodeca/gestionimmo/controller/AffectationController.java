@@ -16,11 +16,21 @@ public class AffectationController {
     public AffectationController(AffectationService affectationService) {
         this.affectationService = affectationService;
     }
+
     @PostMapping("/liberer/{immobilisationId}")
     public ResponseEntity<Void> libererImmobilisation(@PathVariable Long immobilisationId) {
         affectationService.retournerImmobilisation(immobilisationId);
         return ResponseEntity.ok().build();
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<AffectationDTO> updateAffectation(
+            @PathVariable Long id,
+            @RequestBody AffectationDTO affectationDTO
+    ) {
+        AffectationDTO updatedAffectation = affectationService.updateAffectation(id, affectationDTO);
+        return ResponseEntity.ok(updatedAffectation);
+    }
+
     @PostMapping
     public ResponseEntity<AffectationDTO> createAffectation(@RequestBody AffectationDTO dto) {
         AffectationDTO created = affectationService.createAffectation(dto);

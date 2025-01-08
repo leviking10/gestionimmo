@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PlanificationServiceImpl implements PlanificationService {
@@ -47,7 +46,7 @@ public class PlanificationServiceImpl implements PlanificationService {
         return planificationRepository.findAll()
                 .stream()
                 .map(planificationMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -92,7 +91,7 @@ public class PlanificationServiceImpl implements PlanificationService {
         validateDatesOnUpdate(dto);
 
         Planification planification = planificationRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Planification introuvable avec l'ID : " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Planification introuvable ", HttpStatus.NOT_FOUND));
 
         Immobilisation immobilisation = immobilisationRepository.findById(dto.getImmobilisationId())
                 .orElseThrow(() -> new BusinessException("Immobilisation introuvable avec l'ID : " + dto.getImmobilisationId(), HttpStatus.NOT_FOUND));
@@ -113,7 +112,7 @@ public class PlanificationServiceImpl implements PlanificationService {
     @Override
     public PlanificationDTO getPlanificationById(Long id) {
         Planification planification = planificationRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Planification introuvable avec l'ID : " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Planification introuvable", HttpStatus.NOT_FOUND));
         return planificationMapper.toDTO(planification);
     }
 
@@ -125,7 +124,7 @@ public class PlanificationServiceImpl implements PlanificationService {
         return planificationRepository.findByImmobilisation(immobilisation)
                 .stream()
                 .map(planificationMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -136,13 +135,13 @@ public class PlanificationServiceImpl implements PlanificationService {
         return planificationRepository.findByTechniciensContaining(technicien)
                 .stream()
                 .map(planificationMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public void deletePlanification(Long id) {
         if (!planificationRepository.existsById(id)) {
-            throw new BusinessException("Planification introuvable avec l'ID : " + id, HttpStatus.NOT_FOUND);
+            throw new BusinessException("Planification introuvable ", HttpStatus.NOT_FOUND);
         }
         planificationRepository.deleteById(id);
     }
@@ -214,6 +213,6 @@ public class PlanificationServiceImpl implements PlanificationService {
         return ids.stream()
                 .map(id -> personnelRepository.findById(id)
                         .orElseThrow(() -> new BusinessException("Technicien introuvable avec l'ID : " + id, HttpStatus.NOT_FOUND)))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

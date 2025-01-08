@@ -40,7 +40,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public List<InterventionDTO> getInterventionsByImmobilisation(Long immobilisationId) {
         Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
+                .orElseThrow(() -> new BusinessException("Immobilisation introuvable"));
 
         return interventionRepository.findByImmobilisation(immobilisation)
                 .stream()
@@ -50,7 +50,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public InterventionDTO getInterventionById(Long id) {
         Intervention intervention = interventionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Intervention introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Intervention introuvable avec l'ID : " + id));
         return mapper.toDTO(intervention);
     }
     @Override
@@ -103,9 +103,8 @@ public class InterventionServiceImpl implements InterventionService {
         Immobilisation immobilisation = intervention.getImmobilisation();
         if (immobilisation.getEtatImmo() == EtatImmobilisation.SIGNALE) {
             List<Signalement> signalements = signalementRepository.findByImmobilisation(immobilisation);
-            for (Signalement signalement : signalements) {
-                signalementRepository.delete(signalement); // Supprimer les signalements associés
-            }
+            // Supprimer les signalements associés
+            signalementRepository.deleteAll(signalements);
             immobilisation.setEtatImmo(EtatImmobilisation.EN_SERVICE); // Remettre l'immobilisation à l'état de service
             immobilisationRepository.save(immobilisation);
         }

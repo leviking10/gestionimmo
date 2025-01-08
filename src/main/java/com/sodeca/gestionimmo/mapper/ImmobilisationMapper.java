@@ -2,11 +2,11 @@ package com.sodeca.gestionimmo.mapper;
 
 import com.sodeca.gestionimmo.dto.*;
 import com.sodeca.gestionimmo.entity.*;
-import com.sodeca.gestionimmo.enums.EtatImmobilisation;
-import com.sodeca.gestionimmo.enums.StatutAffectation;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.http.HttpStatus;
 
 @Mapper(componentModel = "spring", uses = {CategorieMapper.class})
 public interface ImmobilisationMapper {
@@ -15,15 +15,15 @@ public interface ImmobilisationMapper {
     @Mapping(source = "categorie.categorie", target = "categorieDesignation")
     @Mapping(expression = "java(immobilisation.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
     @Mapping(source = "type", target = "type")
-    @Mapping(source = "etatImmo", target = "etatImmobilisation")
-    @Mapping(source = "statut", target = "affectation")
+    @Mapping(source = "etatImmo", target = "etatImmo")
+    @Mapping(source = "affectation", target = "affectation")
     ImmobilisationDTO toDTO(Immobilisation immobilisation);
 
     // Conversion générique pour ImmobilisationDTO -> Immobilisation
     @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     @Mapping(source = "type", target = "type")
-    @Mapping(source = "etatImmobilisation", target = "etatImmo")
-    @Mapping(source = "affectation", target = "statut")
+    @Mapping(source = "etatImmo", target = "etatImmo")
+    @Mapping(source = "affectation", target = "affectation")
     Immobilisation toEntity(ImmobilisationDTO dto);
 
     // Conversion spécifique pour Ordinateur
@@ -90,49 +90,43 @@ public interface ImmobilisationMapper {
 
     // Conversion polymorphique : ImmobilisationDTO -> Immobilisation
     default Immobilisation toPolymorphicEntity(ImmobilisationDTO dto) {
-        System.out.println("Mapping DTO -> Entity : Etat = " + dto.getEtatImmobilisation() + ", Statut = " + dto.getAffectation());
         if (dto == null || dto.getType() == null) {
-            throw new IllegalArgumentException("DTO ou type d'immobilisation invalide");
+            throw new BusinessException("Le DTO ou le type d'immobilisation est invalide.",
+                    "INVALID_DTO", HttpStatus.BAD_REQUEST);
         }
 
         // Crée l'entité appropriée en fonction du type
-        Immobilisation entity;
-        switch (dto.getType()) {
-            case ORDINATEUR:
-                entity = new Ordinateur();
-                break;
-            case TELEPHONE:
-                entity = new Telephone();
-                break;
-            case VEHICULE:
-                entity = new Vehicule();
-                break;
-            case MACHINE:
-                entity = new Machine();
-                break;
-            case MOBILIER:
-                entity = new Mobilier();
-                break;
-            default:
-                throw new IllegalArgumentException("Type d'immobilisation non pris en charge : " + dto.getType());
-        }
+        Immobilisation entity = switch (dto.getType()) {
+            case ORDINATEUR -> new Ordinateur();
+            case TELEPHONE -> new Telephone();
+            case VEHICULE -> new Vehicule();
+            case MACHINE -> new Machine();
+            case MOBILIER -> new Mobilier();
+            default -> throw new BusinessException("Type d'immobilisation non pris en charge : " + dto.getType(),
+                    "UNSUPPORTED_TYPE", HttpStatus.BAD_REQUEST);
+        };
 
         // Copie les champs communs
-        entity.setId(dto.getId());
-        entity.setCodeImmo(dto.getCodeImmo());
-        entity.setDesignation(dto.getDesignation());
-        entity.setCategorie(new Categorie());
-        entity.getCategorie().setCategorie(dto.getCategorieDesignation());
-        entity.setDateAcquisition(dto.getDateAcquisition());
-        entity.setValeurAcquisition(dto.getValeurAcquisition());
-        entity.setLocalisation(dto.getLocalisation());
-        entity.setQrCode(dto.getQrCode());
-        entity.setDateMiseEnService(dto.getDateMiseEnService());
-        entity.setStatut(dto.getAffectation());
-        entity.setEtatImmo(dto.getEtatImmobilisation());
-        entity.setTypeAmortissement(dto.getTypeAmortissement());
-        entity.setCreatedDate(null);
-        entity.setLastModifiedDate(null);
+        try {
+            entity.setId(dto.getId());
+            entity.setCodeImmo(dto.getCodeImmo());
+            entity.setDesignation(dto.getDesignation());
+            entity.setCategorie(new Categorie());
+            entity.getCategorie().setCategorie(dto.getCategorieDesignation());
+            entity.setDateAcquisition(dto.getDateAcquisition());
+            entity.setValeurAcquisition(dto.getValeurAcquisition());
+            entity.setLocalisation(dto.getLocalisation());
+            entity.setQrCode(dto.getQrCode());
+            entity.setDateMiseEnService(dto.getDateMiseEnService());
+            entity.setAffectation(dto.getAffectation());
+            entity.setEtatImmo(dto.getEtatImmo());
+            entity.setTypeAmortissement(dto.getTypeAmortissement());
+            entity.setCreatedDate(null);
+            entity.setLastModifiedDate(null);
+        } catch (Exception e) {
+            throw new BusinessException("Erreur lors du mappage des champs communs du DTO : " + dto,
+                    "MAPPING_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, e);
+        }
 
         return entity;
     }

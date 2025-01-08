@@ -2,6 +2,7 @@ package com.sodeca.gestionimmo.services;
 
 import com.sodeca.gestionimmo.dto.TelephoneDTO;
 import com.sodeca.gestionimmo.entity.Telephone;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.ImmobilisationMapper;
 import com.sodeca.gestionimmo.repository.TelephoneRepository;
 import org.springframework.stereotype.Service;
@@ -37,15 +38,15 @@ public class TelephoneServiceImpl implements TelephoneService {
     public TelephoneDTO updateTelephone(Long id, TelephoneDTO dto) {
         // Récupérer le téléphone existant
         Telephone existingTelephone = telephoneRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Téléphone non trouvé avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Téléphone non trouvé avec l'ID : " + id));
 
         // Mettre à jour les champs spécifiques
         existingTelephone.setMarque(dto.getMarque());
         existingTelephone.setModele(dto.getModele());
         existingTelephone.setImei(dto.getImei());
         existingTelephone.setNumeroSerie(dto.getNumeroSerie());
-        existingTelephone.setEtatImmo(dto.getEtatImmobilisation());
-        existingTelephone.setStatut(dto.getAffectation());
+        existingTelephone.setEtatImmo(dto.getEtatImmo());
+        existingTelephone.setAffectation(dto.getAffectation());
         // Sauvegarder et retourner le DTO mis à jour
         Telephone updatedTelephone = telephoneRepository.save(existingTelephone);
         return mapper.toTelephoneDTO(updatedTelephone);

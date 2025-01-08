@@ -5,6 +5,7 @@ import com.sodeca.gestionimmo.entity.Affectation;
 import com.sodeca.gestionimmo.entity.Immobilisation;
 import com.sodeca.gestionimmo.entity.Personnel;
 import com.sodeca.gestionimmo.enums.StatutAffectation;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.AffectationMapper;
 import com.sodeca.gestionimmo.repository.AffectationRepository;
 import com.sodeca.gestionimmo.repository.ImmobilisationRepository;
@@ -36,7 +37,7 @@ public class AffectationServiceImpl implements AffectationService {
                 .orElseThrow(() -> new RuntimeException("Affectation introuvable avec l'ID : " + id));
 
         Immobilisation immobilisation = immobilisationRepository.findById(dto.getImmobilisationId())
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + dto.getImmobilisationId()));
+                .orElseThrow(() -> new BusinessException("Immobilisation introuvable  : "));
 
         Personnel personnel = personnelRepository.findById(dto.getPersonnelId())
                 .orElseThrow(() -> new RuntimeException("Personnel introuvable avec l'ID : " + dto.getPersonnelId()));
@@ -89,22 +90,22 @@ public class AffectationServiceImpl implements AffectationService {
     @Override
     public AffectationDTO createAffectation(AffectationDTO dto) {
         Immobilisation immobilisation = immobilisationRepository.findById(dto.getImmobilisationId())
-                .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + dto.getImmobilisationId()));
+                .orElseThrow(() -> new BusinessException("Immobilisation introuvable avec l'ID : " + dto.getImmobilisationId()));
 
         // Vérifier si l'immobilisation est disponible
-        if (immobilisation.getStatut() == StatutAffectation.AFFECTEE) {
-            throw new RuntimeException("L'immobilisation est déjà affectée. Veuillez la libérer avant de la réaffecter.");
+        if (immobilisation.getAffectation() == StatutAffectation.AFFECTE) {
+            throw new BusinessException("L'immobilisation est déjà affectée. Veuillez la libérer avant de la réaffecter.");
         }
 
         Personnel personnel = personnelRepository.findById(dto.getPersonnelId())
-                .orElseThrow(() -> new RuntimeException("Personnel introuvable avec l'ID : " + dto.getPersonnelId()));
+                .orElseThrow(() -> new BusinessException("Personnel introuvable avec l'ID : " + dto.getPersonnelId()));
 
         Affectation affectation = mapper.toEntity(dto);
         affectation.setImmobilisation(immobilisation);
         affectation.setPersonnel(personnel);
         affectation.setDateAffectation(dto.getDateAffectation());
         // Marquer l'immobilisation comme affectée
-        immobilisation.setStatut(StatutAffectation.AFFECTEE);
+        immobilisation.setAffectation(StatutAffectation.AFFECTE);
         immobilisationRepository.save(immobilisation);
 
         Affectation saved = affectationRepository.save(affectation);
@@ -117,11 +118,11 @@ public class AffectationServiceImpl implements AffectationService {
                 .orElseThrow(() -> new RuntimeException("Immobilisation introuvable avec l'ID : " + immobilisationId));
 
         // Vérifier si l'immobilisation est actuellement affectée
-        if (immobilisation.getStatut() == StatutAffectation.DISPONIBLE) {
-            throw new RuntimeException("L'immobilisation est déjà disponible.");
+        if (immobilisation.getAffectation() == StatutAffectation.DISPONIBLE) {
+            throw new BusinessException("L'immobilisation est déjà disponible.");
         }
         // Libérer l'immobilisation
-        immobilisation.setStatut(StatutAffectation.DISPONIBLE);
+        immobilisation.setAffectation(StatutAffectation.DISPONIBLE);
         immobilisationRepository.save(immobilisation);
     }
 }

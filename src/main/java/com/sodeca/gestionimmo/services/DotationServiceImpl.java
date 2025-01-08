@@ -6,6 +6,7 @@ import com.sodeca.gestionimmo.entity.MouvementStock;
 import com.sodeca.gestionimmo.entity.Personnel;
 import com.sodeca.gestionimmo.entity.PieceDetachee;
 import com.sodeca.gestionimmo.enums.TypeMouvement;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.repository.DotationRepository;
 import com.sodeca.gestionimmo.repository.MouvementStockRepository;
 import com.sodeca.gestionimmo.repository.PersonnelRepository;
@@ -55,7 +56,7 @@ public class DotationServiceImpl implements DotationService {
 
         // Vérification du stock disponible
         if (piece.getStockDisponible() < dto.getQuantite()) {
-            throw new RuntimeException("Stock insuffisant pour la dotation demandée.");
+            throw new BusinessException("Stock insuffisant pour la dotation demandée.");
         }
 
         // Mise à jour du stock disponible

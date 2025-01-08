@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import com.sodeca.gestionimmo.dto.PieceDetacheeDTO;
 import com.sodeca.gestionimmo.entity.PieceDetachee;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.PieceDetacheeMapper;
 import com.sodeca.gestionimmo.repository.PieceDetacheeRepository;
 import org.apache.poi.ss.usermodel.*;
@@ -34,7 +35,7 @@ public class PieceImportService {
         } else if (isCsvFile(fileName)) {
             return processCsvFile(file);
         } else {
-            throw new RuntimeException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.");
+            throw new BusinessException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.");
         }
     }
 
@@ -60,7 +61,7 @@ public class PieceImportService {
                 PieceDetachee savedPiece = pieceRepository.save(pieceEntity);
                 pieces.add(pieceMapper.toDTO(savedPiece));
             } catch (Exception e) {
-                System.err.println("Erreur ligne " + row.getRowNum() + ": " + e.getMessage());
+                throw new BusinessException("Erreur ligne " + row.getRowNum() + ": " + e.getMessage());
             }
         }
         workbook.close();
@@ -112,13 +113,10 @@ public class PieceImportService {
 
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                return String.valueOf((int) cell.getNumericCellValue());
-            default:
-                return "";
-        }
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue();
+            case NUMERIC -> String.valueOf((int) cell.getNumericCellValue());
+            default -> "";
+        };
     }
 }

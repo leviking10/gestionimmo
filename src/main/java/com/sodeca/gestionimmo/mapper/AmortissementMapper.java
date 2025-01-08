@@ -2,10 +2,8 @@ package com.sodeca.gestionimmo.mapper;
 
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
 import com.sodeca.gestionimmo.entity.Amortissement;
-import com.sodeca.gestionimmo.repository.AmortissementRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -24,5 +22,5 @@ public interface AmortissementMapper {
     @Mapping(source = "idImmobilisation", target = "immobilisation.id")
     Amortissement toEntity(AmortissementDTO dto);
 
-    public abstract List<AmortissementDTO> toDTOList(List<Amortissement> amortissements);
+    List<AmortissementDTO> toDTOList(List<Amortissement> amortissements);
 }

@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public enum StatutAffectation {
     DISPONIBLE("Disponible"),
-    AFFECTEE("Affectée");
+    AFFECTE("Affecté");
 
     private final String label;
 

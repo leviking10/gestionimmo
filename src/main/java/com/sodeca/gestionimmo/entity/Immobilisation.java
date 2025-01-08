@@ -64,7 +64,7 @@ public class Immobilisation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatutAffectation statut = StatutAffectation.DISPONIBLE;
+    private StatutAffectation affectation = StatutAffectation.DISPONIBLE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

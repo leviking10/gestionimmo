@@ -15,6 +15,6 @@ public class ReparationDTO {
     private String description;
     private double cout;
     private String fournisseur;
-    private double kilometrage; // Nouveau champ
-    private String typeReparation; // Nouveau champ
+    private double kilometrage;
+    private String typeReparation;
 }

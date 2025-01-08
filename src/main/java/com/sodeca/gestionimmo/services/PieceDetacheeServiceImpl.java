@@ -8,6 +8,7 @@ import com.sodeca.gestionimmo.entity.MouvementStock;
 import com.sodeca.gestionimmo.entity.PieceDetachee;
 import com.sodeca.gestionimmo.enums.StatutDemande;
 import com.sodeca.gestionimmo.enums.TypeMouvement;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.mapper.MouvementStockMapper;
 import com.sodeca.gestionimmo.mapper.PieceDetacheeMapper;
 import com.sodeca.gestionimmo.repository.DemandePieceRepository;
@@ -57,7 +58,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
     @Override
     public PieceDetacheeDTO updatePiece(Long id, PieceDetacheeDTO dto) {
         PieceDetachee piece = pieceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pièce introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Pièce introuvable ID : " + id));
         piece.setNom(dto.getNom());
         piece.setReference(dto.getReference());
         piece.setDescription(dto.getDescription());
@@ -70,7 +71,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
     @Override
     public void deletePiece(Long id) {
         if (!pieceRepository.existsById(id)) {
-            throw new RuntimeException("Pièce introuvable avec l'ID : " + id);
+            throw new BusinessException("Pièce introuvable ");
         }
         pieceRepository.deleteById(id);
     }
@@ -78,7 +79,7 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
     @Override
     public PieceDetacheeDTO getPieceById(Long id) {
         PieceDetachee piece = pieceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pièce introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Pièce introuvable " + id));
         return pieceMapper.toDTO(piece);
     }
 
@@ -138,12 +139,12 @@ public class PieceDetacheeServiceImpl implements PieceDetacheeService {
                 .orElseThrow(() -> new RuntimeException("Demande introuvable avec l'ID : " + demandeId));
 
         if (demande.getStatut() == StatutDemande.APPROUVE || demande.getStatut() == StatutDemande.ANNULE) {
-            throw new RuntimeException("La demande ne peut pas être validée car elle est déjà traitée ou annulée.");
+            throw new BusinessException("La demande ne peut pas être validée car elle est déjà traitée ou annulée.");
         }
 
         PieceDetachee piece = demande.getPiece();
         if (piece.getStockDisponible() < demande.getQuantiteDemandee()) {
-            throw new RuntimeException("Stock insuffisant pour valider la demande.");
+            throw new BusinessException("Stock insuffisant pour valider la demande.");
         }
 
         piece.setStockDisponible(piece.getStockDisponible() - demande.getQuantiteDemandee());

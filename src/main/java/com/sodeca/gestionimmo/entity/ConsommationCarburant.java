@@ -34,5 +34,5 @@ public class ConsommationCarburant {
     private String stationService;
 
     @Column
-    private double kilométrage; // Nouveau champ : pour enregistrer le kilométrage du véhicule
+    private double kilometrage; // Nouveau champ : pour enregistrer le kilométrage du véhicule
 }

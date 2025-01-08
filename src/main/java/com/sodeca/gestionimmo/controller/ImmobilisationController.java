@@ -2,18 +2,17 @@ package com.sodeca.gestionimmo.controller;
 
 import com.sodeca.gestionimmo.dto.AmortissementDTO;
 import com.sodeca.gestionimmo.dto.ImmobilisationDTO;
+import com.sodeca.gestionimmo.entity.ApiResponse;
 import com.sodeca.gestionimmo.enums.EtatImmobilisation;
+import com.sodeca.gestionimmo.exceptions.BusinessException;
 import com.sodeca.gestionimmo.services.AmortissementService;
 import com.sodeca.gestionimmo.services.ImmobilisationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -21,9 +20,11 @@ import java.util.List;
 public class ImmobilisationController {
 
     private final ImmobilisationService immobilisationService;
+    private final AmortissementService amortissementService;
 
-    public ImmobilisationController(ImmobilisationService immobilisationService) {
+    public ImmobilisationController(ImmobilisationService immobilisationService, AmortissementService amortissementService) {
         this.immobilisationService = immobilisationService;
+        this.amortissementService = amortissementService;
     }
 
     // **********************************
@@ -43,8 +44,8 @@ public class ImmobilisationController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    @Autowired
-    private AmortissementService amortissementService;
+
+
 
     @GetMapping("/{id}/amortissements")
     public ResponseEntity<List<AmortissementDTO>> getAmortissementsByImmobilisation(@PathVariable Long id) {
@@ -131,7 +132,7 @@ public class ImmobilisationController {
 
     // Mettre à jour l'état d'une immobilisation
     @PutMapping("/etat/{id}")
-    public ResponseEntity<?> updateEtat(@PathVariable Long id, @RequestParam String etat) {
+    public ResponseEntity<String> updateEtat(@PathVariable Long id, @RequestParam String etat) {
         EtatImmobilisation etatImmobilisation;
         try {
             etatImmobilisation = EtatImmobilisation.fromLabelOrName(etat);
@@ -152,34 +153,42 @@ public class ImmobilisationController {
      */
 
 
-
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<List<ImmobilisationDTO>>> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             // Vérification si le fichier est vide
             if (file.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Le fichier est vide. Veuillez fournir un fichier valide.");
+                ApiResponse<List<ImmobilisationDTO>> response = new ApiResponse<>(
+                        "Le fichier est vide. Veuillez fournir un fichier valide.", null, HttpStatus.BAD_REQUEST.value());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
 
             // Appel au service pour traiter le fichier
             List<ImmobilisationDTO> importedImmobilisations = immobilisationService.importImmobilisationsFromFile(file);
 
             // Retourner la liste des immobilisations importées
-            return ResponseEntity.ok(importedImmobilisations);
-        } catch (RuntimeException e) {
-            // Gérer les erreurs spécifiques de runtime
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            ApiResponse<List<ImmobilisationDTO>> response = new ApiResponse<>(
+                    "Importation réussie.", importedImmobilisations, HttpStatus.OK.value());
+            return ResponseEntity.ok(response);
+
+        } catch (BusinessException e) {
+            // Gérer les erreurs métier spécifiques
+            ApiResponse<List<ImmobilisationDTO>> response = new ApiResponse<>(
+                    e.getMessage(), null, e.getStatus().value());
+            return ResponseEntity.status(e.getStatus()).body(response);
+
         } catch (Exception e) {
-            // Gérer les autres erreurs
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Une erreur est survenue lors de l'importation : " + e.getMessage());
+            // Gérer les erreurs inattendues
+            ApiResponse<List<ImmobilisationDTO>> response = new ApiResponse<>(
+                    "Une erreur interne est survenue : " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
+
     /** liste des immobilisations cédées
      *
-     * @return
+     *
      */
     @GetMapping("/ceded")
     public List<ImmobilisationDTO> getImmobilisationsCedees() {
