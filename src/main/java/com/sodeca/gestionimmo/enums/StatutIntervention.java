@@ -12,9 +12,12 @@ public enum StatutIntervention {
             return newStatut == TERMINEE;
         }
     },
-    TERMINEE;
+    TERMINEE {
+        @Override
+        public boolean canTransitionTo(StatutIntervention newStatut) {
+            return false;
+        }
+    };
 
-    public boolean canTransitionTo(StatutIntervention newStatut) {
-        return false;
-    }
+    public abstract boolean canTransitionTo(StatutIntervention newStatut);
 }

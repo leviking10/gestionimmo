@@ -174,7 +174,7 @@ public class AmortissementServiceImpl implements AmortissementService {
     @Override
     public List<AmortissementDTO> getFilteredAmortissements(String categorie, String methode, String etat, String periode) {
         return amortissementRepository.findAll().stream()
-                .filter(amortissement -> categorie == null || amortissement.getImmobilisation().getCategorie().getCategorie().equalsIgnoreCase(categorie))
+                .filter(amortissement -> categorie == null || amortissement.getImmobilisation().getCategorie().getDescription().equalsIgnoreCase(categorie))
                 .filter(amortissement -> methode == null || amortissement.getImmobilisation().getTypeAmortissement().toString().equalsIgnoreCase(methode))
                 .filter(amortissement -> etat == null || amortissement.getStatut().toString().equalsIgnoreCase(etat))
                 .filter(amortissement -> periode == null || amortissement.getDateCalcul().toString().contains(periode))

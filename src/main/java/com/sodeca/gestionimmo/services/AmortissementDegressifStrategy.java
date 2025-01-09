@@ -15,7 +15,8 @@ import java.util.Optional;
 public class AmortissementDegressifStrategy implements AmortissementStrategy {
 
     private static final Logger logger = LoggerFactory.getLogger(AmortissementDegressifStrategy.class);
-
+    private static final String METHODE_DEGRESSIF = "Dégressif";
+    private static final String METHODE_LINEAIRE = "Linéaire";
     @Override
     public List<Amortissement> calculerAmortissements(Immobilisation immobilisation, Optional<Amortissement> dernierAmortissement) {
         List<Amortissement> amortissements = new ArrayList<>();
@@ -56,7 +57,7 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
 
                 amortissements.add(Amortissement.builder()
                         .immobilisation(immobilisation)
-                        .methode("Dégressif")
+                        .methode(METHODE_DEGRESSIF)
                         .montantAmorti(montantProrata)
                         .montantCumule(montantCumule)
                         .coefficientDegressif(coefficient)
@@ -73,11 +74,11 @@ public class AmortissementDegressifStrategy implements AmortissementStrategy {
             valeurComptable -= montantAmorti;
             montantCumule += montantAmorti;
 
-            logger.info("Année {} : Méthode = {}, Montant amorti = {}, Cumul = {}", i + 1, utiliserLineaire ? "Linéaire" : "Dégressif", montantAmorti, montantCumule);
+            logger.info("Année {} : Méthode = {}, Montant amorti = {}, Cumul = {}", i + 1, utiliserLineaire ? METHODE_LINEAIRE : METHODE_DEGRESSIF, montantAmorti, montantCumule);
 
             amortissements.add(Amortissement.builder()
                     .immobilisation(immobilisation)
-                    .methode(utiliserLineaire ? "Linéaire" : "Dégressif")
+                    .methode(utiliserLineaire ? METHODE_LINEAIRE : METHODE_DEGRESSIF)
                     .montantAmorti(montantAmorti)
                     .montantCumule(montantCumule)
                     .coefficientDegressif(coefficient)

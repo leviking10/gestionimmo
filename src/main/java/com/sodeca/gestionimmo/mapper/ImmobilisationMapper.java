@@ -5,67 +5,65 @@ import com.sodeca.gestionimmo.entity.*;
 import com.sodeca.gestionimmo.exceptions.BusinessException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.springframework.http.HttpStatus;
 
 @Mapper(componentModel = "spring", uses = {CategorieMapper.class})
 public interface ImmobilisationMapper {
 
     // Conversion générique pour Immobilisation -> ImmobilisationDTO
-    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
-    @Mapping(expression = "java(immobilisation.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    @Mapping(source = "categorie.designation", target = "categorieDesignation") // Utilisation du chemin valide
+    @Mapping(source = "categorie.dureeAmortissement", target = "dureeAmortissement") // Utilisation du chemin valide
     @Mapping(source = "type", target = "type")
     @Mapping(source = "etatImmo", target = "etatImmo")
     @Mapping(source = "affectation", target = "affectation")
     ImmobilisationDTO toDTO(Immobilisation immobilisation);
 
     // Conversion générique pour ImmobilisationDTO -> Immobilisation
-    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
     @Mapping(source = "type", target = "type")
     @Mapping(source = "etatImmo", target = "etatImmo")
     @Mapping(source = "affectation", target = "affectation")
+    @Mapping(target = "categorie", expression = "java(fromDesignation(dto.getCategorieDesignation()))") // Méthode utilitaire pour construire la catégorie
     Immobilisation toEntity(ImmobilisationDTO dto);
 
     // Conversion spécifique pour Ordinateur
-    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
-    @Mapping(expression = "java(ordinateur.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    @Mapping(source = "categorie.designation", target = "categorieDesignation")
+    @Mapping(source = "categorie.dureeAmortissement", target = "dureeAmortissement")
     OrdinateurDTO toOrdinateurDTO(Ordinateur ordinateur);
 
-    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
+    @Mapping(source = "categorieDesignation", target = "categorie.designation") // Mapping imbriqué
     Ordinateur toOrdinateur(OrdinateurDTO dto);
 
     // Conversion spécifique pour Telephone
-    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
-    @Mapping(expression = "java(telephone.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    @Mapping(source = "categorie.designation", target = "categorieDesignation")
+    @Mapping(source = "categorie.dureeAmortissement", target = "dureeAmortissement")
     TelephoneDTO toTelephoneDTO(Telephone telephone);
 
-    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
+    @Mapping(source = "categorieDesignation", target = "categorie.designation") // Mapping imbriqué
     Telephone toTelephone(TelephoneDTO dto);
 
     // Conversion spécifique pour Vehicule
-    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
-    @Mapping(expression = "java(vehicule.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    @Mapping(source = "categorie.designation", target = "categorieDesignation")
+    @Mapping(source = "categorie.dureeAmortissement", target = "dureeAmortissement")
     VehiculeDTO toVehiculeDTO(Vehicule vehicule);
 
-    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
+    @Mapping(source = "categorieDesignation", target = "categorie.designation") // Mapping imbriqué
     Vehicule toVehicule(VehiculeDTO dto);
 
     // Conversion spécifique pour Machine
-    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
-    @Mapping(expression = "java(machine.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    @Mapping(source = "categorie.designation", target = "categorieDesignation")
+    @Mapping(source = "categorie.dureeAmortissement", target = "dureeAmortissement")
     MachineDTO toMachineDTO(Machine machine);
 
-    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
+    @Mapping(source = "categorieDesignation", target = "categorie.designation") // Mapping imbriqué
     Machine toMachine(MachineDTO dto);
 
     // Conversion spécifique pour Mobilier
-    @Mapping(source = "categorie.categorie", target = "categorieDesignation")
-    @Mapping(expression = "java(mobilier.getCategorie().getDureeAmortissement())", target = "dureeAmortissement")
+    @Mapping(source = "categorie.designation", target = "categorieDesignation")
+    @Mapping(source = "categorie.dureeAmortissement", target = "dureeAmortissement")
     MobilierDTO toMobilierDTO(Mobilier mobilier);
 
-    @Mapping(source = "categorieDesignation", target = "categorie", qualifiedByName = "fromDesignation")
+    @Mapping(source = "categorieDesignation", target = "categorie.designation") // Mapping imbriqué
     Mobilier toMobilier(MobilierDTO dto);
-
     // Conversion polymorphique : Immobilisation -> ImmobilisationDTO
     default ImmobilisationDTO toPolymorphicDTO(Immobilisation immobilisation) {
         if (immobilisation == null) {
@@ -112,7 +110,7 @@ public interface ImmobilisationMapper {
             entity.setCodeImmo(dto.getCodeImmo());
             entity.setDesignation(dto.getDesignation());
             entity.setCategorie(new Categorie());
-            entity.getCategorie().setCategorie(dto.getCategorieDesignation());
+            entity.getCategorie().setDesignation(dto.getCategorieDesignation());
             entity.setDateAcquisition(dto.getDateAcquisition());
             entity.setValeurAcquisition(dto.getValeurAcquisition());
             entity.setLocalisation(dto.getLocalisation());
@@ -133,13 +131,12 @@ public interface ImmobilisationMapper {
 
 
     // Méthode utilitaire : Désignation de catégorie -> Entité Categorie
-    @Named("fromDesignation")
     default Categorie fromDesignation(String designation) {
         if (designation == null) {
             return null;
         }
         Categorie categorie = new Categorie();
-        categorie.setCategorie(designation);
+        categorie.setDesignation(designation);
         return categorie;
     }
     default Immobilisation fromId(Long id) {

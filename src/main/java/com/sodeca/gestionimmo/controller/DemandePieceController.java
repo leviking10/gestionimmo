@@ -43,7 +43,7 @@ public class DemandePieceController {
      * @return La demande validée.
      */
     @PutMapping("/{id}/valider")
-    public ResponseEntity<?> validerDemande(@PathVariable Long id) {
+    public ResponseEntity<Object> validerDemande(@PathVariable Long id) {
         try {
             DemandePieceDTO validatedDemande = service.validerDemande(id);
             return ResponseEntity.ok(validatedDemande);

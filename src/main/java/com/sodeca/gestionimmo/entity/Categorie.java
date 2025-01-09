@@ -19,7 +19,7 @@ public class Categorie {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String categorie; // Nom de la catégorie (ex. "Mobilier", "Matériel informatique", etc.)
+    private String designation; // Nom de la catégorie (ex. "Mobilier", "Matériel informatique", etc.)
 
     @Column
     private String description; // Description de la catégorie

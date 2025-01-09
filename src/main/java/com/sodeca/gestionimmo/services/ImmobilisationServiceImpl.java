@@ -77,7 +77,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     }
 
     private Categorie getValidatedCategorie(String designation) {
-        Categorie categorie = categorieRepository.findByCategorie(designation)
+        Categorie categorie = categorieRepository.findByDesignation(designation)
                 .orElseThrow(() -> new RuntimeException("Catégorie introuvable : " + designation));
         if (!categorie.isActif()) {
             throw new BusinessException("La catégorie sélectionnée est désactivée.");
@@ -434,7 +434,7 @@ public class ImmobilisationServiceImpl implements ImmobilisationService {
     }
     private List<ImmobilisationDTO> saveImportedImmobilisations(List<ImmobilisationDTO> dtos) {
         List<Immobilisation> immobilisations = dtos.stream().map(dto -> {
-            Categorie categorie = categorieRepository.findByCategorie(dto.getCategorieDesignation())
+            Categorie categorie = categorieRepository.findByDesignation(dto.getCategorieDesignation())
                     .orElseThrow(() -> new RuntimeException("Catégorie introuvable : " + dto.getCategorieDesignation()));
             Immobilisation immobilisation = mapper.toPolymorphicEntity(dto);
             immobilisation.setCategorie(categorie);

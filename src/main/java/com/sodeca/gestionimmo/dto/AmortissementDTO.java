@@ -1,7 +1,6 @@
 package com.sodeca.gestionimmo.dto;
 
 import com.sodeca.gestionimmo.enums.StatutAmmortissement;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

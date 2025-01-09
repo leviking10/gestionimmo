@@ -1,7 +1,9 @@
 package com.sodeca.gestionimmo.exceptions;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class NotFoundException extends RuntimeException {
 
     private final HttpStatus status;
@@ -11,7 +13,4 @@ public class NotFoundException extends RuntimeException {
         this.status = HttpStatus.NOT_FOUND;
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
 }

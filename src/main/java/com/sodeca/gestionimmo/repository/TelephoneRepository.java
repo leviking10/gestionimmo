@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TelephoneRepository extends JpaRepository<Telephone, Long> {
-    // Requêtes spécifiques à Telephone, par exemple :
-    // List<Telephone> findByMarque(String marque);
 }

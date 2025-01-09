@@ -29,7 +29,7 @@ public class Amortissement {
     private double montantAmorti; // Montant amorti pour la période
 
     @Column
-    private Double coefficientDegressif; // Coefficient spécifique pour le mode dégressif (SYSCOA)
+    private Double coefficientDegressif; // Coefficient spécifique pour le mode dégressif
 
     @Column(nullable = false)
     private LocalDate dateDebutExercice; // Début de l'exercice comptable (gestion au prorata)

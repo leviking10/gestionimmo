@@ -49,7 +49,7 @@ private final Logger logger = LoggerFactory.getLogger(AmortissementController.cl
      * @return Liste des AmortissementDTO générés.
      */
     @PostMapping("/generate/{immobilisationId}")
-    public ResponseEntity<?> generateAmortissements(@PathVariable Long immobilisationId) {
+    public ResponseEntity<Object> generateAmortissements(@PathVariable Long immobilisationId) {
         try {
             Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
                     .orElseThrow(() -> new RuntimeException("Immobilisation introuvable"));
@@ -92,7 +92,7 @@ private final Logger logger = LoggerFactory.getLogger(AmortissementController.cl
      * @return Une réponse avec le statut 200 (OK) si réussi.
      */
     @PutMapping("/cancel/{id}")
-    public ResponseEntity<?> cancelAmortissement(@PathVariable int id) {
+    public ResponseEntity<String> cancelAmortissement(@PathVariable int id) {
         try {
             amortissementService.cancelAmortissement(id);
             return ResponseEntity.ok("Amortissement annulé avec succès.");
@@ -114,13 +114,20 @@ private final Logger logger = LoggerFactory.getLogger(AmortissementController.cl
             @RequestParam String date) {
         try {
             logger.info("Fetching situation cumul for immobilisation ID: {} up to date: {}", immobilisationId, date);
+
             SituationAmortissementDTO situation = amortissementService.getSituationAmortissementsAvecCumul(immobilisationId, date);
+
             return ResponseEntity.ok(situation);
-        } catch (RuntimeException ex) {
-            logger.error("Error fetching situation cumul for immobilisation ID: {} up to date: {}", immobilisationId, date, ex);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (BusinessException ex) {
+            // Gestion des erreurs métier spécifiques
+            logger.warn("Business error while fetching situation cumul for immobilisation ID: {} up to date: {}", immobilisationId, date, ex);
+            return ResponseEntity.status(ex.getStatus()).body(null);
+        } catch (Exception ex) {
+            throw new BusinessException("Erreur inattendue lors de la récupération de la situation cumulée pour l'immobilisation ID: " + immobilisationId,
+                    "FETCH_SITUATION_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, ex);
         }
     }
+
     /**
      * Récupérer tous les amortissements.
      *

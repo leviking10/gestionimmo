@@ -1,5 +1,4 @@
 package com.sodeca.gestionimmo.entity;
-import com.sodeca.gestionimmo.enums.TypeImmobilisation;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;

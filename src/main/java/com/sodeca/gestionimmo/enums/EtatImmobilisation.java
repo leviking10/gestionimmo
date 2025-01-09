@@ -2,10 +2,6 @@ package com.sodeca.gestionimmo.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import jakarta.validation.constraints.NotNull;
-
-import java.util.Arrays;
-
 public enum EtatImmobilisation {
     EN_SERVICE("En service"),
     EN_MAINTENANCE("En maintenance"),
