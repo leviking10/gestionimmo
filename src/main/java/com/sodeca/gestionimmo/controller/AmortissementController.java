@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -113,21 +112,27 @@ private final Logger logger = LoggerFactory.getLogger(AmortissementController.cl
             @PathVariable Long immobilisationId,
             @RequestParam String date) {
         try {
-            logger.info("Fetching situation cumul for immobilisation ID: {} up to date: {}", immobilisationId, date);
+            // Validation des entrées utilisateur
+            if (immobilisationId == null || immobilisationId <= 0) {
+                throw new BusinessException("L'ID de l'immobilisation est invalide.",
+                        "INVALID_IMMOBILISATION_ID", HttpStatus.BAD_REQUEST);
+            }
 
+            // Récupération de la situation
             SituationAmortissementDTO situation = amortissementService.getSituationAmortissementsAvecCumul(immobilisationId, date);
 
             return ResponseEntity.ok(situation);
         } catch (BusinessException ex) {
-            // Gestion des erreurs métier spécifiques
-            logger.warn("Business error while fetching situation cumul for immobilisation ID: {} up to date: {}", immobilisationId, date, ex);
+            // Gestion des erreurs métier spécifiques avec journalisation sécurisée
+            logger.warn("Erreur métier lors de la récupération de la situation cumulée. ID Immobilisation : {}, Date : {}",
+                    immobilisationId, "[MASKED]", ex);
             return ResponseEntity.status(ex.getStatus()).body(null);
         } catch (Exception ex) {
-            throw new BusinessException("Erreur inattendue lors de la récupération de la situation cumulée pour l'immobilisation ID: " + immobilisationId,
+            // Gestion des erreurs inattendues
+            throw new BusinessException("Erreur inattendue lors de la récupération de la situation cumulée.",
                     "FETCH_SITUATION_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, ex);
         }
     }
-
     /**
      * Récupérer tous les amortissements.
      *

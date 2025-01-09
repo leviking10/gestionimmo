@@ -56,7 +56,7 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
                     .methode("Linéaire")
                     .montantAmorti(montantAmorti)
                     .dateDebutExercice(dateDebutExercice.plusYears(i))
-                    .dateCalcul(dateDebutExercice.plusYears(i + 1).minusDays(1))
+                    .dateCalcul(dateDebutExercice.plusYears((long) i + 1).minusDays(1)) // Cast explicite de i + 1 en long
                     .valeurNette(Math.max(valeurComptable, 0.0))
                     .tauxAnnuel(tauxAnnuelConstant)
                     .prorata(i == 0 && isProrataApplicable(immobilisation) ? prorataCalcul(immobilisation, montantAnnuel) : 0.0)
@@ -64,17 +64,16 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
                     .build());
         }
 
+
         if (valeurComptable > 0) {
             logger.info("Ajout d'une dernière ligne pour équilibrer. Montant restant = {}", valeurComptable);
-            double montantAmortiFinal = valeurComptable;
-            valeurComptable -= montantAmortiFinal;
 
             amortissements.add(Amortissement.builder()
                     .immobilisation(immobilisation)
                     .methode("Linéaire")
-                    .montantAmorti(montantAmortiFinal)
+                    .montantAmorti(valeurComptable)
                     .dateDebutExercice(dateDebutExercice.plusYears(dureeRestante))
-                    .dateCalcul(dateDebutExercice.plusYears(dureeRestante + 1).minusDays(1))
+                    .dateCalcul(dateDebutExercice.plusYears((long) dureeRestante + 1).minusDays(1))
                     .valeurNette(0.0)
                     .tauxAnnuel(tauxAnnuelConstant)
                     .prorata(0.0)

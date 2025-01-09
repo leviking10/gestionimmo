@@ -4,8 +4,6 @@ import com.sodeca.gestionimmo.dto.AmortissementDTO;
 import com.sodeca.gestionimmo.dto.SituationAmortissementDTO;
 
 import java.util.List;
-import java.util.Map;
-
 public interface AmortissementService {
 
     List<AmortissementDTO> getAmortissementsByImmobilisation(Long immobilisationId);

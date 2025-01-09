@@ -42,6 +42,8 @@ public class ApprovisionnementImportService {
     }
 
     public List<MouvementStockDTO> importApprovisionnements(MultipartFile file) throws IOException {
+        validateFile(file);
+
         String fileName = Objects.requireNonNull(file.getOriginalFilename()).toLowerCase();
 
         if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
@@ -49,27 +51,59 @@ public class ApprovisionnementImportService {
         } else if (fileName.endsWith(".csv")) {
             return processApprovisionnementsFromCsv(file);
         } else {
-            throw new BusinessException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.");
+            throw new BusinessException("Format de fichier non supporté. Veuillez uploader un fichier Excel ou CSV.",
+                    "UNSUPPORTED_FILE_FORMAT", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("Le fichier est vide ou non fourni.",
+                    "EMPTY_FILE", HttpStatus.BAD_REQUEST);
+        }
+        if (file.getOriginalFilename() == null) {
+            throw new BusinessException("Le fichier doit avoir un nom valide.",
+                    "INVALID_FILE_NAME", HttpStatus.BAD_REQUEST);
         }
     }
 
     private List<MouvementStockDTO> processApprovisionnementsFromExcel(MultipartFile file) throws IOException {
         List<MouvementStockDTO> mouvements = new ArrayList<>();
-        Workbook workbook = WorkbookFactory.create(file.getInputStream());
-        Sheet sheet = workbook.getSheetAt(0);
-
-        for (Row row : sheet) {
-            if (row.getRowNum() == 0) continue;
-
-            try {
-                MouvementStockDTO mouvementDTO = mapExcelRowToMouvementDTO(row);
-                mouvements.add(enregistrerMouvement(mouvementDTO));
-            } catch (Exception e) {
-                throw new BusinessException("Erreur ligne " + row.getRowNum() + ": " + e.getMessage());
-            }
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            sheet.forEach(row -> {
+                if (row.getRowNum() == 0) return; // Ignorer l'en-tête
+                processExcelRow(row, mouvements);
+            });
+        } catch (IOException ex) {
+            logger.error("Erreur de lecture du fichier Excel : {}", ex.getMessage(), ex);
+            throw new BusinessException("Erreur de lecture du fichier Excel.",
+                    "EXCEL_IO_ERROR", HttpStatus.BAD_REQUEST, ex);
+        } catch (IllegalArgumentException ex) {
+            logger.error("Erreur dans les données du fichier Excel : {}", ex.getMessage(), ex);
+            throw new BusinessException("Erreur dans les données du fichier Excel.",
+                    "EXCEL_DATA_ERROR", HttpStatus.BAD_REQUEST, ex);
+        } catch (Exception ex) {
+            logger.error("Erreur inattendue lors du traitement du fichier Excel : {}", ex.getMessage(), ex);
+            throw new BusinessException("Erreur inattendue lors du traitement du fichier Excel.",
+                    "EXCEL_PROCESSING_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, ex);
         }
-        workbook.close();
         return mouvements;
+    }
+
+    private void processExcelRow(Row row, List<MouvementStockDTO> mouvements) {
+        try {
+            MouvementStockDTO mouvementDTO = mapExcelRowToMouvementDTO(row);
+            mouvements.add(enregistrerMouvement(mouvementDTO));
+        } catch (BusinessException ex) {
+            logger.warn("Erreur métier lors du traitement de la ligne Excel {} : {}", row.getRowNum(), ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            logger.warn("Erreur de validation des données à la ligne Excel {} : {}", row.getRowNum(), ex.getMessage(), ex);
+        } catch (Exception ex) {
+            logger.error("Erreur inattendue à la ligne Excel {} : {}", row.getRowNum(), ex.getMessage(), ex);
+            throw new BusinessException("Erreur inattendue lors du traitement de la ligne Excel.",
+                    "EXCEL_ROW_PROCESSING_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, ex);
+        }
     }
     private List<MouvementStockDTO> processApprovisionnementsFromCsv(MultipartFile file) throws IOException {
         List<MouvementStockDTO> mouvements = new ArrayList<>();
@@ -82,21 +116,7 @@ public class ApprovisionnementImportService {
                     isHeader = false; // Ignorer la première ligne d'en-tête
                     continue;
                 }
-                try {
-                    // Mappage de la ligne CSV en MouvementStockDTO
-                    MouvementStockDTO mouvementDTO = mapCsvRowToMouvementDTO(values);
-
-                    // Enregistrement du mouvement
-                    mouvements.add(enregistrerMouvement(mouvementDTO));
-                } catch (BusinessException e) {
-                    // Journaux pour capturer les erreurs métier spécifiques
-                    logger.warn("Erreur lors du traitement d'une ligne CSV : {}", Arrays.toString(values), e);
-                } catch (Exception e) {
-                    // Journaux pour capturer les erreurs inattendues
-                    logger.error("Erreur inattendue lors du traitement d'une ligne CSV : {}", Arrays.toString(values), e);
-                    throw new BusinessException("Erreur inattendue lors du traitement du fichier CSV.",
-                            "CSV_PROCESSING_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, e);
-                }
+                processCsvLine(values, mouvements);
             }
         } catch (CsvValidationException e) {
             throw new BusinessException("Erreur de validation dans le fichier CSV.",
@@ -107,10 +127,39 @@ public class ApprovisionnementImportService {
         }
         return mouvements;
     }
+    private void processCsvLine(String[] csvRow, List<MouvementStockDTO> stockMovements) {
+        if (csvRow == null || csvRow.length == 0) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Ligne CSV vide ou invalide rencontrée : {}", Arrays.toString(csvRow));
+            }
+            return;
+        }
+        try {
+            MouvementStockDTO movementDTO = mapCsvRowToMouvementDTO(csvRow);
+            stockMovements.add(enregistrerMouvement(movementDTO));
+        } catch (BusinessException ex) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Erreur métier lors du traitement d'une ligne CSV : {}", Arrays.toString(csvRow), ex);
+            }
+        } catch (RuntimeException ex) {
+            if (logger.isErrorEnabled()) {
+                logger.error("Erreur inattendue lors du traitement d'une ligne CSV : {}", Arrays.toString(csvRow), ex);
+            }
+            throw new BusinessException(
+                    "Erreur inattendue lors du traitement du fichier CSV.",
+                    "CSV_PROCESSING_ERROR",
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ex
+            );
+        }
+    }
+
+
 
     private MouvementStockDTO enregistrerMouvement(MouvementStockDTO dto) {
         PieceDetachee piece = pieceRepository.findByReference(dto.getReferencePiece())
-                .orElseThrow(() -> new RuntimeException("Pièce introuvable avec la référence : " + dto.getReferencePiece()));
+                .orElseThrow(() -> new BusinessException("Pièce introuvable avec la référence : " + dto.getReferencePiece(),
+                        "PIECE_NOT_FOUND", HttpStatus.BAD_REQUEST));
 
         piece.setStockDisponible(piece.getStockDisponible() + dto.getQuantite());
         pieceRepository.save(piece);
