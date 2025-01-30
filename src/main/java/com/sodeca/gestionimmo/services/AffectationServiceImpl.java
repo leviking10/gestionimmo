@@ -46,7 +46,6 @@ public class AffectationServiceImpl implements AffectationService {
         affectation.setPersonnel(personnel);
         affectation.setDateAffectation(dto.getDateAffectation());
         affectation.setDateRetour(dto.getDateRetour());
-
         Affectation updated = affectationRepository.save(affectation);
         return mapper.toDTO(updated);
     }

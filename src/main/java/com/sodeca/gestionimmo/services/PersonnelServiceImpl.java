@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.opencsv.CSVReader;
 import java.io.InputStreamReader;
+import java.util.Objects;
 
 
 @Service
@@ -129,7 +130,7 @@ public class PersonnelServiceImpl implements PersonnelService {
  */
     @Override
     public List<PersonnelDTO> readFile(MultipartFile file) throws IOException {
-        String fileName = file.getOriginalFilename().toLowerCase();
+        String fileName = Objects.requireNonNull(file.getOriginalFilename()).toLowerCase();
 
         if (isExcelFile(fileName)) {
             return processExcelFile(file);

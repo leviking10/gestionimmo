@@ -116,9 +116,7 @@ public class AmortissementServiceImpl implements AmortissementService {
 
     @Override
     public SituationAmortissementDTO getSituationAmortissementsAvecCumul(Long immobilisationId, String date) {
-        logger.info("Fetching amortissement situation for immobilisation ID: {} up to date: {}", immobilisationId, date);
-
-        // Rendre filterDate "effectivement finale"
+      // Rendre filterDate "effectivement finale"
         final LocalDate filterDate = LocalDate.parse(date);
 
         // Récupérer l'immobilisation

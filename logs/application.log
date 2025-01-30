@@ -1,0 +1,325 @@
+2025-01-30 12:36:23 INFO  c.s.g.GestionimmoApplication - Starting GestionimmoApplication using Java 17.0.6 with PID 10588 (C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo\target\classes started by MoussaDIALLO in C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo)
+2025-01-30 12:36:23 DEBUG c.s.g.GestionimmoApplication - Running with Spring Boot v3.3.5, Spring v6.1.14
+2025-01-30 12:36:23 INFO  c.s.g.GestionimmoApplication - No active profile set, falling back to 1 default profile: "default"
+2025-01-30 12:36:23 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Fetching config from server at : http://localhost:9999
+2025-01-30 12:36:23 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Located environment: name=gestionimmo, profiles=[default], label=null, version=57938b31f59306553249d0f1a05019a42217f1b2, state=null
+2025-01-30 12:36:23 INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-01-30 12:36:23 INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-01-30 12:36:25 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-01-30 12:36:25 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 402 ms. Found 22 JPA repository interfaces.
+2025-01-30 12:36:26 INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=ca3e8e24-5cdc-3725-ba37-6af727ba079d
+2025-01-30 12:36:26 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2025-01-30 12:36:26 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected/applied to a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies/advisors. If this bean does not have to be post-processed, declare it with ROLE_INFRASTRUCTURE.
+2025-01-30 12:36:27 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-01-30 12:36:27 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:36:27 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-01-30 12:36:27 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.31]
+2025-01-30 12:36:27 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-01-30 12:36:27 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4622 ms
+2025-01-30 12:36:28 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-01-30 12:36:28 INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2025-01-30 12:36:28 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-01-30 12:36:29 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-01-30 12:36:29 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-01-30 12:36:30 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@19e70fe2
+2025-01-30 12:36:30 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-01-30 12:36:30 WARN  org.hibernate.dialect.Dialect - HHH000511: The 5.7.40 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2025-01-30 12:36:30 WARN  o.h.boot.model.internal.EntityBinder - HHH000457: Joined inheritance hierarchy [com.sodeca.gestionimmo.entity.Immobilisation] defined explicit @DiscriminatorColumn.  Legacy Hibernate behavior was to ignore the @DiscriminatorColumn.  However, as part of issue HHH-6911 we now apply the explicit @DiscriminatorColumn.  If you would prefer the legacy behavior, enable the `hibernate.discriminator.ignore_explicit_for_joined` setting (hibernate.discriminator.ignore_explicit_for_joined=true)
+2025-01-30 12:36:33 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-01-30 12:36:33 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:36:35 WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-01-30 12:36:38 INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-01-30 12:36:38 INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses RestTemplate.
+2025-01-30 12:36:39 WARN  o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-01-30 12:36:39 INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 18 endpoints beneath base path '/actuator'
+2025-01-30 12:36:39 INFO  o.s.c.n.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2025-01-30 12:36:39 INFO  c.n.d.s.r.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Disable delta property : false
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Application is null : false
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Application version is -1: true
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - The response status is 200
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 5
+2025-01-30 12:36:39 INFO  c.n.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1738240599897 with initial instances count: 1
+2025-01-30 12:36:39 INFO  o.s.c.n.e.s.EurekaServiceRegistry - Registering application GESTIONIMMO with eureka with status UP
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240599913, current=UP, previous=STARTING]
+2025-01-30 12:36:39 WARN  c.n.discovery.InstanceInfoReplicator - Ignoring onDemand update due to rate limiter
+2025-01-30 12:36:39 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082: registering service...
+2025-01-30 12:36:39 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path '/'
+2025-01-30 12:36:39 INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 8082
+2025-01-30 12:36:39 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - registration status: 204
+2025-01-30 12:36:40 INFO  c.s.g.GestionimmoApplication - Started GestionimmoApplication in 22.883 seconds (process running for 25.415)
+2025-01-30 12:36:41 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-01-30 12:36:41 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-01-30 12:36:41 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 5 ms
+2025-01-30 12:37:52 INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 218 class path changes (0 additions, 218 deletions, 0 modifications)
+2025-01-30 12:37:52 INFO  o.s.c.n.e.s.EurekaServiceRegistry - Unregistering application GESTIONIMMO with eureka with status DOWN
+2025-01-30 12:37:52 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240672644, current=DOWN, previous=UP]
+2025-01-30 12:37:52 INFO  o.a.coyote.http11.Http11NioProtocol - Stopping ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:37:52 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240672655, current=UP, previous=DOWN]
+2025-01-30 12:37:52 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082: registering service...
+2025-01-30 12:37:52 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - registration status: 204
+2025-01-30 12:37:55 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:37:55 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-01-30 12:37:55 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-01-30 12:37:55 INFO  c.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2025-01-30 12:37:58 INFO  c.netflix.discovery.DiscoveryClient - Unregistering ...
+2025-01-30 12:37:58 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - deregister  status: 200
+2025-01-30 12:37:58 INFO  c.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
+2025-01-30 12:38:01 INFO  c.s.g.GestionimmoApplication - Starting GestionimmoApplication using Java 17.0.6 with PID 10588 (C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo\target\classes started by MoussaDIALLO in C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo)
+2025-01-30 12:38:01 DEBUG c.s.g.GestionimmoApplication - Running with Spring Boot v3.3.5, Spring v6.1.14
+2025-01-30 12:38:01 INFO  c.s.g.GestionimmoApplication - No active profile set, falling back to 1 default profile: "default"
+2025-01-30 12:38:01 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Fetching config from server at : http://localhost:9999
+2025-01-30 12:38:01 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Located environment: name=gestionimmo, profiles=[default], label=null, version=57938b31f59306553249d0f1a05019a42217f1b2, state=null
+2025-01-30 12:38:02 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-01-30 12:38:02 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 JPA repository interfaces.
+2025-01-30 12:38:02 INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=f1210b98-13f5-3c81-87bb-000cf2dbd9d7
+2025-01-30 12:38:02 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2025-01-30 12:38:02 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected/applied to a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies/advisors. If this bean does not have to be post-processed, declare it with ROLE_INFRASTRUCTURE.
+2025-01-30 12:38:02 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-01-30 12:38:02 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:38:02 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-01-30 12:38:02 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.31]
+2025-01-30 12:38:02 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-01-30 12:38:02 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1894 ms
+2025-01-30 12:38:03 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-01-30 12:38:03 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-01-30 12:38:03 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-01-30 12:38:03 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2025-01-30 12:38:03 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6072aa72
+2025-01-30 12:38:03 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2025-01-30 12:38:03 WARN  org.hibernate.dialect.Dialect - HHH000511: The 5.7.40 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2025-01-30 12:38:03 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-01-30 12:38:03 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:38:03 WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-01-30 12:38:06 INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-01-30 12:38:08 INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 2 class path changes (2 additions, 0 deletions, 0 modifications)
+2025-01-30 12:38:08 INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses RestTemplate.
+2025-01-30 12:38:08 WARN  o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-01-30 12:38:08 INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 18 endpoints beneath base path '/actuator'
+2025-01-30 12:38:09 INFO  o.s.c.n.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2025-01-30 12:38:09 INFO  c.n.d.s.r.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Disable delta property : false
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Application is null : false
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Application version is -1: true
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - The response status is 200
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 5
+2025-01-30 12:38:09 INFO  c.n.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1738240689267 with initial instances count: 1
+2025-01-30 12:38:09 INFO  o.s.c.n.e.s.EurekaServiceRegistry - Registering application GESTIONIMMO with eureka with status UP
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240689285, current=UP, previous=STARTING]
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082: registering service...
+2025-01-30 12:38:09 WARN  c.n.discovery.InstanceInfoReplicator - Ignoring onDemand update due to rate limiter
+2025-01-30 12:38:09 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:38:09 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path '/'
+2025-01-30 12:38:09 INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 8082
+2025-01-30 12:38:09 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - registration status: 204
+2025-01-30 12:38:10 INFO  c.s.g.GestionimmoApplication - Started GestionimmoApplication in 12.402 seconds (process running for 115.407)
+2025-01-30 12:38:10 INFO  o.s.c.n.e.s.EurekaServiceRegistry - Unregistering application GESTIONIMMO with eureka with status DOWN
+2025-01-30 12:38:10 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240690794, current=DOWN, previous=UP]
+2025-01-30 12:38:10 WARN  c.n.discovery.InstanceInfoReplicator - Ignoring onDemand update due to rate limiter
+2025-01-30 12:38:10 INFO  o.a.coyote.http11.Http11NioProtocol - Stopping ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:38:10 INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-01-30 12:38:13 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:38:13 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2025-01-30 12:38:13 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2025-01-30 12:38:13 INFO  c.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2025-01-30 12:38:14 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - Re-registering apps/GESTIONIMMO
+2025-01-30 12:38:14 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082: registering service...
+2025-01-30 12:38:14 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - registration status: 204
+2025-01-30 12:38:16 INFO  c.netflix.discovery.DiscoveryClient - Unregistering ...
+2025-01-30 12:38:16 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - deregister  status: 200
+2025-01-30 12:38:16 INFO  c.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
+2025-01-30 12:38:19 INFO  c.s.g.GestionimmoApplication - Starting GestionimmoApplication using Java 17.0.6 with PID 10588 (C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo\target\classes started by MoussaDIALLO in C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo)
+2025-01-30 12:38:19 DEBUG c.s.g.GestionimmoApplication - Running with Spring Boot v3.3.5, Spring v6.1.14
+2025-01-30 12:38:19 INFO  c.s.g.GestionimmoApplication - No active profile set, falling back to 1 default profile: "default"
+2025-01-30 12:38:19 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Fetching config from server at : http://localhost:9999
+2025-01-30 12:38:19 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Located environment: name=gestionimmo, profiles=[default], label=null, version=57938b31f59306553249d0f1a05019a42217f1b2, state=null
+2025-01-30 12:38:21 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-01-30 12:38:21 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 102 ms. Found 1 JPA repository interface.
+2025-01-30 12:38:21 INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=a921e23a-03ef-3566-9dfa-6b5e79a5394b
+2025-01-30 12:38:22 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2025-01-30 12:38:22 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected/applied to a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies/advisors. If this bean does not have to be post-processed, declare it with ROLE_INFRASTRUCTURE.
+2025-01-30 12:38:22 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-01-30 12:38:22 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:38:22 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-01-30 12:38:22 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.31]
+2025-01-30 12:38:22 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-01-30 12:38:22 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2643 ms
+2025-01-30 12:38:23 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-01-30 12:38:23 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-01-30 12:38:23 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-01-30 12:38:23 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2025-01-30 12:38:23 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7a289e83
+2025-01-30 12:38:23 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2025-01-30 12:38:23 WARN  org.hibernate.dialect.Dialect - HHH000511: The 5.7.40 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2025-01-30 12:38:23 WARN  o.h.boot.model.internal.EntityBinder - HHH000457: Joined inheritance hierarchy [com.sodeca.gestionimmo.entity.Immobilisation] defined explicit @DiscriminatorColumn.  Legacy Hibernate behavior was to ignore the @DiscriminatorColumn.  However, as part of issue HHH-6911 we now apply the explicit @DiscriminatorColumn.  If you would prefer the legacy behavior, enable the `hibernate.discriminator.ignore_explicit_for_joined` setting (hibernate.discriminator.ignore_explicit_for_joined=true)
+2025-01-30 12:38:24 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-01-30 12:38:24 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:38:24 WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'affectationController' defined in file [C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo\target\classes\com\sodeca\gestionimmo\controller\AffectationController.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'com.sodeca.gestionimmo.services.AffectationService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-01-30 12:38:24 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:38:24 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2025-01-30 12:38:24 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2025-01-30 12:38:24 INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2025-01-30 12:38:24 INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-01-30 12:38:24 ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.sodeca.gestionimmo.controller.AffectationController required a bean of type 'com.sodeca.gestionimmo.services.AffectationService' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.sodeca.gestionimmo.services.AffectationService' in your configuration.
+
+2025-01-30 12:38:30 INFO  c.s.g.GestionimmoApplication - Starting GestionimmoApplication using Java 17.0.6 with PID 10588 (C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo\target\classes started by MoussaDIALLO in C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo)
+2025-01-30 12:38:30 DEBUG c.s.g.GestionimmoApplication - Running with Spring Boot v3.3.5, Spring v6.1.14
+2025-01-30 12:38:30 INFO  c.s.g.GestionimmoApplication - No active profile set, falling back to 1 default profile: "default"
+2025-01-30 12:38:30 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Fetching config from server at : http://localhost:9999
+2025-01-30 12:38:30 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Located environment: name=gestionimmo, profiles=[default], label=null, version=57938b31f59306553249d0f1a05019a42217f1b2, state=null
+2025-01-30 12:38:31 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-01-30 12:38:31 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 223 ms. Found 22 JPA repository interfaces.
+2025-01-30 12:38:32 INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=ca3e8e24-5cdc-3725-ba37-6af727ba079d
+2025-01-30 12:38:32 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2025-01-30 12:38:32 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected/applied to a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies/advisors. If this bean does not have to be post-processed, declare it with ROLE_INFRASTRUCTURE.
+2025-01-30 12:38:33 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-01-30 12:38:33 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:38:33 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-01-30 12:38:33 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.31]
+2025-01-30 12:38:33 INFO  o.a.c.c.C.[Tomcat-1].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-01-30 12:38:33 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3578 ms
+2025-01-30 12:38:34 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-01-30 12:38:34 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-01-30 12:38:34 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-01-30 12:38:34 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2025-01-30 12:38:34 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5644e169
+2025-01-30 12:38:34 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2025-01-30 12:38:34 WARN  org.hibernate.dialect.Dialect - HHH000511: The 5.7.40 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2025-01-30 12:38:34 WARN  o.h.boot.model.internal.EntityBinder - HHH000457: Joined inheritance hierarchy [com.sodeca.gestionimmo.entity.Immobilisation] defined explicit @DiscriminatorColumn.  Legacy Hibernate behavior was to ignore the @DiscriminatorColumn.  However, as part of issue HHH-6911 we now apply the explicit @DiscriminatorColumn.  If you would prefer the legacy behavior, enable the `hibernate.discriminator.ignore_explicit_for_joined` setting (hibernate.discriminator.ignore_explicit_for_joined=true)
+2025-01-30 12:38:35 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-01-30 12:38:36 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:38:38 WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-01-30 12:38:44 INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-01-30 12:38:47 INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses RestTemplate.
+2025-01-30 12:38:47 WARN  o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-01-30 12:38:47 INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 18 endpoints beneath base path '/actuator'
+2025-01-30 12:38:47 INFO  o.s.c.n.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2025-01-30 12:38:47 INFO  c.n.d.s.r.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Disable delta property : false
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Application is null : false
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Application version is -1: true
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - The response status is 200
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 5
+2025-01-30 12:38:47 INFO  c.n.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1738240727695 with initial instances count: 1
+2025-01-30 12:38:47 INFO  o.s.c.n.e.s.EurekaServiceRegistry - Registering application GESTIONIMMO with eureka with status UP
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240727710, current=UP, previous=STARTING]
+2025-01-30 12:38:47 WARN  c.n.discovery.InstanceInfoReplicator - Ignoring onDemand update due to rate limiter
+2025-01-30 12:38:47 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:38:47 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path '/'
+2025-01-30 12:38:47 INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 8082
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082: registering service...
+2025-01-30 12:38:47 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - registration status: 204
+2025-01-30 12:38:49 INFO  c.s.g.GestionimmoApplication - Started GestionimmoApplication in 22.06 seconds (process running for 154.17)
+2025-01-30 12:38:49 INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-01-30 12:38:56 INFO  o.a.c.c.C.[Tomcat-1].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-01-30 12:38:56 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-01-30 12:38:56 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2025-01-30 12:38:58 WARN  o.s.c.s.ResourceBundleMessageSource - ResourceBundle [messages] not found for MessageSource: Can't find bundle for base name messages, locale fr_FR
+2025-01-30 12:38:58 INFO  o.s.api.AbstractOpenApiResource - Init duration for springdoc-openapi is: 1327 ms
+2025-01-30 12:39:23 INFO  o.s.c.n.e.s.EurekaServiceRegistry - Unregistering application GESTIONIMMO with eureka with status DOWN
+2025-01-30 12:39:23 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240763837, current=DOWN, previous=UP]
+2025-01-30 12:39:23 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240763843, current=UP, previous=DOWN]
+2025-01-30 12:39:23 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082: registering service...
+2025-01-30 12:39:23 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - registration status: 204
+2025-01-30 12:39:25 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:39:25 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown initiated...
+2025-01-30 12:39:25 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown completed.
+2025-01-30 12:39:25 INFO  c.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2025-01-30 12:39:28 INFO  c.netflix.discovery.DiscoveryClient - Unregistering ...
+2025-01-30 12:39:28 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - deregister  status: 200
+2025-01-30 12:39:28 INFO  c.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
+2025-01-30 12:39:40 INFO  c.s.g.GestionimmoApplication - Starting GestionimmoApplication using Java 17.0.6 with PID 33608 (C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo\target\classes started by MoussaDIALLO in C:\Users\MoussaDIALLO\OneDrive - CASAMANCAISE\Documents\Mon Memoire\gestionimmo)
+2025-01-30 12:39:40 DEBUG c.s.g.GestionimmoApplication - Running with Spring Boot v3.3.5, Spring v6.1.14
+2025-01-30 12:39:40 INFO  c.s.g.GestionimmoApplication - No active profile set, falling back to 1 default profile: "default"
+2025-01-30 12:39:40 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Fetching config from server at : http://localhost:9999
+2025-01-30 12:39:40 INFO  o.s.c.c.c.ConfigServerConfigDataLoader - Located environment: name=gestionimmo, profiles=[default], label=null, version=57938b31f59306553249d0f1a05019a42217f1b2, state=null
+2025-01-30 12:39:40 INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-01-30 12:39:40 INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-01-30 12:39:42 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-01-30 12:39:42 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 321 ms. Found 22 JPA repository interfaces.
+2025-01-30 12:39:42 INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=ca3e8e24-5cdc-3725-ba37-6af727ba079d
+2025-01-30 12:39:43 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2025-01-30 12:39:43 WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected/applied to a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies/advisors. If this bean does not have to be post-processed, declare it with ROLE_INFRASTRUCTURE.
+2025-01-30 12:39:43 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-01-30 12:39:44 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:39:44 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-01-30 12:39:44 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.31]
+2025-01-30 12:39:44 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-01-30 12:39:44 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4033 ms
+2025-01-30 12:39:44 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-01-30 12:39:44 INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2025-01-30 12:39:44 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-01-30 12:39:45 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-01-30 12:39:45 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-01-30 12:39:45 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@26760879
+2025-01-30 12:39:45 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-01-30 12:39:45 WARN  org.hibernate.dialect.Dialect - HHH000511: The 5.7.40 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2025-01-30 12:39:45 WARN  o.h.boot.model.internal.EntityBinder - HHH000457: Joined inheritance hierarchy [com.sodeca.gestionimmo.entity.Immobilisation] defined explicit @DiscriminatorColumn.  Legacy Hibernate behavior was to ignore the @DiscriminatorColumn.  However, as part of issue HHH-6911 we now apply the explicit @DiscriminatorColumn.  If you would prefer the legacy behavior, enable the `hibernate.discriminator.ignore_explicit_for_joined` setting (hibernate.discriminator.ignore_explicit_for_joined=true)
+2025-01-30 12:39:47 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-01-30 12:39:47 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-01-30 12:39:49 WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-01-30 12:39:51 INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-01-30 12:39:51 INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses RestTemplate.
+2025-01-30 12:39:51 WARN  o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-01-30 12:39:51 INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 18 endpoints beneath base path '/actuator'
+2025-01-30 12:39:51 INFO  o.s.c.n.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2025-01-30 12:39:52 INFO  c.n.d.s.r.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Disable delta property : false
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Application is null : false
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Application version is -1: true
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - The response status is 200
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 5
+2025-01-30 12:39:52 INFO  c.n.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1738240792494 with initial instances count: 1
+2025-01-30 12:39:52 INFO  o.s.c.n.e.s.EurekaServiceRegistry - Registering application GESTIONIMMO with eureka with status UP
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1738240792514, current=UP, previous=STARTING]
+2025-01-30 12:39:52 WARN  c.n.discovery.InstanceInfoReplicator - Ignoring onDemand update due to rate limiter
+2025-01-30 12:39:52 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8082"]
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082: registering service...
+2025-01-30 12:39:52 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path '/'
+2025-01-30 12:39:52 INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 8082
+2025-01-30 12:39:52 INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_GESTIONIMMO/Moussa-DIALLO.localdomain:gestionimmo:8082 - registration status: 204
+2025-01-30 12:39:53 INFO  c.s.g.GestionimmoApplication - Started GestionimmoApplication in 17.335 seconds (process running for 20.487)
+2025-01-30 12:40:02 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-01-30 12:40:02 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-01-30 12:40:02 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 6 ms
+2025-01-30 12:40:18 INFO  c.s.g.s.SignalementServiceImpl - Récupération de tous les signalements

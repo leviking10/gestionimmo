@@ -22,3 +22,12 @@ management:
   endpoint:
     loggers:
       enabled: true
+
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 5  # Envoi d'un heartbeat toutes les 5 secondes
+    lease-expiration-duration-in-seconds: 10  # Eureka considère le service comme down après 10 secondes sans heartbeat
+  client:
+    healthcheck:
+      enabled: true  # Active les checks de santé pour que Eureka détecte l'état réel du service
+

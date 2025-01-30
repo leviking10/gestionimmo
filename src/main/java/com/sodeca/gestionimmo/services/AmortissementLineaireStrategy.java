@@ -80,11 +80,9 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
                     .statut(StatutAmmortissement.AMORTI)
                     .build());
         }
-
         double totalAmortissements = amortissements.stream()
                 .mapToDouble(Amortissement::getMontantAmorti)
                 .sum();
-
         logger.info("Valeur d'acquisition : {}, Total des amortissements : {}", valeurAcquisition, totalAmortissements);
 
         if (Math.abs(totalAmortissements - valeurAcquisition) > 0.1) { // Tolérance
@@ -93,7 +91,6 @@ public class AmortissementLineaireStrategy implements AmortissementStrategy {
 
         return amortissements;
     }
-
 
     // Vérifie si un prorata est applicable
     private boolean isProrataApplicable(Immobilisation immobilisation) {

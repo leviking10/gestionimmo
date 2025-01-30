@@ -40,7 +40,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public List<InterventionDTO> getInterventionsByImmobilisation(Long immobilisationId) {
         Immobilisation immobilisation = immobilisationRepository.findById(immobilisationId)
-                .orElseThrow(() -> new BusinessException("Immobilisation introuvable"));
+                .orElseThrow(() -> new BusinessException("Cette immobilisation introuvable"));
 
         return interventionRepository.findByImmobilisation(immobilisation)
                 .stream()
@@ -50,14 +50,14 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public InterventionDTO getInterventionById(Long id) {
         Intervention intervention = interventionRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Intervention introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new BusinessException("Cette intervention introuvable"));
         return mapper.toDTO(intervention);
     }
     @Override
     public InterventionDTO terminerIntervention(Long id, String rapport) {
         // Récupérer l'intervention
         Intervention intervention = interventionRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Intervention introuvable avec l'ID : " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("l'intervention introuvable", HttpStatus.NOT_FOUND));
 
         // Vérifier que l'intervention est en cours
         if (!intervention.getStatut().equals(StatutIntervention.EN_COURS)) {
@@ -97,7 +97,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public void deleteIntervention(Long id) {
         Intervention intervention = interventionRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Intervention introuvable avec l'ID : " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Intervention introuvable", HttpStatus.NOT_FOUND));
 
         // Si l'intervention est liée à un signalement, remettre le signalement et l'immobilisation à l'état initial
         Immobilisation immobilisation = intervention.getImmobilisation();
@@ -117,7 +117,7 @@ public class InterventionServiceImpl implements InterventionService {
     public InterventionDTO commencerIntervention(Long id) {
         // Récupérer l'intervention
         Intervention intervention = interventionRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Intervention introuvable avec l'ID : " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Intervention introuvable", HttpStatus.NOT_FOUND));
 
         // Vérifier que l'intervention est en attente
         if (!intervention.getStatut().equals(StatutIntervention.EN_ATTENTE)) {
@@ -196,7 +196,7 @@ public class InterventionServiceImpl implements InterventionService {
         Personnel technicien = null;
         if (dto.getTechnicienId() != null) {
             technicien = personnelRepository.findById(dto.getTechnicienId())
-                    .orElseThrow(() -> new BusinessException("Technicien introuvable", HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException("Le technicien introuvable", HttpStatus.NOT_FOUND));
         }
 
         // Création de l'intervention

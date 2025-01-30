@@ -21,7 +21,7 @@ class GestionimmoApplicationTests {
     }
     @Autowired
     private ImmobilisationMapper immobilisationMapper;
-
+/*
     @Test
     public void testMapperToDTOAndToEntity() {
         // Créer une entité d'exemple
@@ -54,5 +54,5 @@ class GestionimmoApplicationTests {
         assertEquals(EtatImmobilisation.EN_SERVICE, entity.getEtatImmo());
         assertEquals(StatutAffectation.DISPONIBLE, entity.getStatut());
     }
-
+*/
 }

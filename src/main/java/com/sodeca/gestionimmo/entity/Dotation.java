@@ -12,20 +12,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Dotation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne(optional = false)
     private PieceDetachee piece;
-
     @ManyToOne(optional = false)
     private Personnel technicien;
-
     @Column(nullable = false)
     private int quantite;
-
     @Column(nullable = false)
     private LocalDateTime dateDotation;
 }

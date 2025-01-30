@@ -78,20 +78,16 @@ public class SignalementServiceImpl implements SignalementService {
         // Vérification et récupération du personnel
         Personnel personnel = personnelRepository.findById(signalementDTO.getPersonnelId())
                 .orElseThrow(() -> new BusinessException("Personnel introuvable"));
-
         // Vérification et récupération de l'immobilisation
         Immobilisation immobilisation = immobilisationRepository.findById(signalementDTO.getImmobilisationId())
                 .orElseThrow(() -> new BusinessException("Immobilisation introuvable"));
-
         // Vérifier si l'immobilisation est déjà signalée
         if (immobilisation.getEtatImmo() == EtatImmobilisation.SIGNALE) {
             throw new BusinessException("L'immobilisation est déjà signalée en panne.");
         }
-
         // Mettre à jour l'état de l'immobilisation
         immobilisation.setEtatImmo(EtatImmobilisation.SIGNALE);
         immobilisationRepository.save(immobilisation);
-
         // Créer le signalement
         Signalement signalement = signalementMapper.toEntity(signalementDTO);
         signalement.setPersonnel(personnel);
@@ -113,7 +109,7 @@ public class SignalementServiceImpl implements SignalementService {
         intervention.setType(TypeIntervention.CORRECTIVE);
         intervention.setStatut(StatutIntervention.EN_ATTENTE);
         intervention.setDatePlanification(LocalDate.now()); // Date actuelle comme date de planification
-        intervention.setDescription("Intervention générée automatiquement pour le signalement ID: " + signalement.getId());
+        intervention.setDescription(signalement.getDescription());// Description du signalement
         intervention.setPlanification(null); // Pas de planification associée dans ce cas
         interventionRepository.save(intervention);
     }
@@ -152,19 +148,15 @@ public class SignalementServiceImpl implements SignalementService {
         log.info("Récupération du nombre total de signalements");
         return signalementRepository.count();
     }
-
     @Override
     public SignalementDTO updateSignalement(Long signalementId, SignalementDTO signalementDTO) {
         log.info("Mise à jour du signalement ID {}", signalementId);
         Signalement signalement = validateSignalement(signalementId);
-
         Personnel personnel = validatePersonnel(signalementDTO.getPersonnelId());
         Immobilisation immobilisation = validateImmobilisation(signalementDTO.getImmobilisationId());
-
         signalement.setPersonnel(personnel);
         signalement.setImmobilisation(immobilisation);
         signalement.setDescription(signalementDTO.getDescription());
-
         Signalement updatedSignalement = signalementRepository.save(signalement);
         return signalementMapper.toDTO(updatedSignalement);
     }

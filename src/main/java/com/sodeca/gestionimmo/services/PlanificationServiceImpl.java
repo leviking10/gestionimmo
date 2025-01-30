@@ -55,7 +55,7 @@ public class PlanificationServiceImpl implements PlanificationService {
 
         // Récupérer l'immobilisation
         Immobilisation immobilisation = immobilisationRepository.findById(dto.getImmobilisationId())
-                .orElseThrow(() -> new BusinessException("Immobilisation introuvable avec l'ID : " + dto.getImmobilisationId(), HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("L'immobilisation introuvable avec l'ID : " + dto.getImmobilisationId(), HttpStatus.NOT_FOUND));
 
         // Récupérer les techniciens
         List<Personnel> techniciens = mapTechnicienIdsToEntities(dto.getTechnicienIds());
@@ -97,13 +97,13 @@ public class PlanificationServiceImpl implements PlanificationService {
                 .orElseThrow(() -> new BusinessException("Immobilisation introuvable avec l'ID : " + dto.getImmobilisationId(), HttpStatus.NOT_FOUND));
 
         List<Personnel> techniciens = mapTechnicienIdsToEntities(dto.getTechnicienIds());
-
         planification.setDescription(dto.getDescription());
         planification.setPriorite(dto.getPriorite());
         planification.setStatut(dto.getStatut());
         planification.setDateDebut(dto.getDateDebut());
         planification.setImmobilisation(immobilisation);
         planification.setTechniciens(techniciens);
+       planification.setDateFin(dto.getDateFin());
 
         Planification updatedPlanification = planificationRepository.save(planification);
         return planificationMapper.toDTO(updatedPlanification);

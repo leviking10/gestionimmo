@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class PieceImportService {
@@ -28,7 +29,7 @@ public class PieceImportService {
     }
 
     public List<PieceDetacheeDTO> importPieces(MultipartFile file) throws IOException {
-        String fileName = file.getOriginalFilename().toLowerCase();
+        String fileName = Objects.requireNonNull(file.getOriginalFilename()).toLowerCase();
 
         if (isExcelFile(fileName)) {
             return processExcelFile(file);

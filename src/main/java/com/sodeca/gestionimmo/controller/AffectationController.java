@@ -1,17 +1,13 @@
 package com.sodeca.gestionimmo.controller;
-
 import com.sodeca.gestionimmo.dto.AffectationDTO;
 import com.sodeca.gestionimmo.services.AffectationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/affectations")
 public class AffectationController {
-
     private final AffectationService affectationService;
     public AffectationController(AffectationService affectationService) {
         this.affectationService = affectationService;
@@ -45,12 +41,10 @@ public class AffectationController {
     public ResponseEntity<List<AffectationDTO>> getAffectationsByPersonnel(@PathVariable Long personnelId) {
         return ResponseEntity.ok(affectationService.getAffectationsByPersonnel(personnelId));
     }
-
     @GetMapping("/immobilisation/{immobilisationId}")
     public ResponseEntity<List<AffectationDTO>> getAffectationsByImmobilisation(@PathVariable Long immobilisationId) {
         return ResponseEntity.ok(affectationService.getAffectationsByImmobilisation(immobilisationId));
     }
-
     @GetMapping("/historique")
     public ResponseEntity<List<AffectationDTO>> getHistoriqueAffectations() {
         return ResponseEntity.ok(affectationService.getHistoriqueAffectations());

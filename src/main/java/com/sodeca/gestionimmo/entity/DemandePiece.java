@@ -1,5 +1,4 @@
 package com.sodeca.gestionimmo.entity;
-
 import com.sodeca.gestionimmo.enums.StatutDemande;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;

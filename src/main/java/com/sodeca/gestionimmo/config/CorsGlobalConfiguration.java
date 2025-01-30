@@ -9,7 +9,7 @@ public class CorsGlobalConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Cela s'applique à toutes les routes de l'application
-                .allowedOrigins("http://localhost:4200") // Remplacez par les origines que vous voulez autoriser
+                .allowedOrigins("http://localhost:4200", "http://localhost:7865","http://localhost:8080")// les origines que vous voulez autoriser
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // Méthodes HTTP autorisées
                 .allowedHeaders("*") // Tous les headers sont autorisés
                 .allowCredentials(true) // Cookies et authentification

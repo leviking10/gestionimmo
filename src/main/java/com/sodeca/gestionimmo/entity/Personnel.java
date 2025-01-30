@@ -27,13 +27,10 @@ private String matricule;
 
     @Column(nullable = false)
     private String telephone;
-
     @Column
     private String poste; // Ex : Responsable IT, Technicien, etc.
-
     @Column
     private String departement; // Ex : IT, Production, Administration
-
     @Column
     private String adresse;
     @Column
